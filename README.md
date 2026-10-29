@@ -1,11 +1,16 @@
-Voici le fichier **`README.md`** complet et tout-en-un pour ton dépôt GitHub `b7mid/Symfony`. Il intègre l'ensemble de la documentation, de l'architecture technique, des fonctionnalités (y compris le téléchargement de CV et l'intégration de l'image de bannière) et des instructions d'installation.
+Voici la marche à suivre complète, étape par étape, pour finaliser ton fichier **README.md** avec la description de la plateforme, l'enregistrer dans ton code, et tout synchroniser proprement sur ton dépôt GitHub.
 
-Crée ou remplace le contenu de ton fichier `README.md` à la racine de ton projet (`D:\xampp\htdocs\my-project\my-project\README.md`) par le texte suivant :
+---
+
+### Étape 1 : Mettre à jour le fichier `README.md` dans ton code
+
+Remplace le contenu de ton fichier `README.md` (situé à la racine `D:\xampp\htdocs\my-project\my-project\README.md`) par cette version complète et finale :
 
 ```markdown
 # 🚀 Job Board & Candidature Platform (Symfony 7)
 
-A robust web application built with **Symfony 7** for managing job postings and candidate applications, developed as part of the Polytechnique Sousse practical workshop.
+## 🎯 À propos de la plateforme
+**Job Board & Candidature Platform** est une application web moderne conçue pour simplifier la mise en relation entre les recruteurs et les candidats. Développée dans le cadre des ateliers pratiques de génie informatique à **Polytechnique Sousse**, elle offre une interface intuitive permettant de gérer l'intégralité du cycle de vie des offres d'emploi et des candidatures associées (soumission de profils, téléchargement sécurisé de CV au format PDF, relations `ManyToOne` avec Doctrine et tableau de bord global).
 
 ![Project Banner](public/images/images.jpg)
 
@@ -129,13 +134,14 @@ php -S 127.0.0.1:8000 -t public
 
 ---
 
-### Commandes Git pour mettre à jour et pousser sur GitHub
+### Étape 2 : Synchroniser et pousser sur GitHub
 
-Ouvre ton terminal PowerShell à la racine du projet (`D:\xampp\htdocs\my-project\my-project`) et exécute ces commandes :
+Ouvre ton terminal PowerShell à la racine du projet (`D:\xampp\htdocs\my-project\my-project`) et exécute ces commandes en séquence :
 
 ```powershell
-git add README.md
-git commit -m "Update comprehensive project README.md"
+git add .
+git commit -m "Add complete platform description to README and sync local changes"
+git pull origin main --rebase
 git push origin main
 
 ```
