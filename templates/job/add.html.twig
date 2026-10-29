@@ -1,0 +1,18 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ parent() }} - Create Job{% endblock %}
+
+{% block body %}
+<div class="example-wrapper" style="margin: 2em auto; max-width: 800px; font-family: sans-serif;">
+    <h1>Create a New Job Offer</h1>
+
+    {{ form_start(form) }}
+        {{ form_widget(form) }}
+        <button type="submit" style="margin-top: 15px; padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Save Job</button>
+    {{ form_end(form) }}
+
+    <p style="margin-top: 20px;">
+        <a href="{{ path('job_list') }}">&larr; Back to job list</a>
+    </p>
+</div>
+{% endblock %}

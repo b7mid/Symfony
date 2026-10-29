@@ -1,0 +1,15 @@
+{% extends 'base.html.twig' %}
+{% block title %}Post a New Job - db_jobs{% endblock %}
+{% block body %}
+<div class="row justify-content-center">
+    <div class="col-md-7">
+        <div class="mb-3"><a href="{{ path('app_job_index') }}" class="text-decoration-none text-muted"><i class="bi bi-arrow-left me-1"></i> Back to Job Listings</a></div>
+        <div class="card shadow-sm border-0 rounded-4 p-4">
+            <div class="card-body">
+                <h2 class="fw-bold text-dark mb-4"><i class="bi bi-plus-circle text-primary me-2"></i> Post a New Job</h2>
+                {{ include('job/_form.html.twig', {'button_label': 'Publish Job'}) }}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
