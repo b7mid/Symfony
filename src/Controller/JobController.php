@@ -22,7 +22,6 @@ class JobController extends AbstractController
     #[Route('/jobs/{id}', name: 'app_job_show')]
     public function show(int $id, JobRepository $jobRepository): Response
     {
-        // Safely find the job by ID to show its summary
         $job = $jobRepository->find($id);
 
         if (!$job) {

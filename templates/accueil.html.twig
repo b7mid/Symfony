@@ -3,7 +3,13 @@
 {% block title %}Welcome - Symfony Project{% endblock %}
 
 {% block body %}
-    <div class="container" style="padding: 3rem; text-align: center; font-family: sans-serif; max-width: 600px; margin: auto;">
+    <div class="container" style="padding: 2.5rem; text-align: center; font-family: sans-serif; max-width: 600px; margin: auto;">
+        
+        <!-- Integrated Project Image -->
+        <div style="margin-bottom: 1.5rem;">
+            <img src="{{ asset('images/images.jpg') }}" alt="Project Banner" style="width: 100%; max-height: 250px; object-fit: cover; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        </div>
+
         <h1 style="color: #1f2937; margin-bottom: 1rem;">Welcome to My Symfony Project</h1>
         <p style="color: #4b5563; margin-bottom: 2rem;">Choose a section below to get started:</p>
         
@@ -11,8 +17,11 @@
             <a href="{{ path('app_numbers') }}" style="padding: 0.75rem 1.5rem; background-color: #2563eb; color: white; text-decoration: none; border-radius: 0.375rem; font-weight: 500; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
                 View Numbers
             </a>
+            <a href="{{ path('app_job_index') }}" style="padding: 0.75rem 1.5rem; background-color: #d97706; color: white; text-decoration: none; border-radius: 0.375rem; font-weight: 500; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                View Job Offers
+            </a>
             <a href="{{ path('app_candidate_index') }}" style="padding: 0.75rem 1.5rem; background-color: #059669; color: white; text-decoration: none; border-radius: 0.375rem; font-weight: 500; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-                View Candidates / Listings
+                View Candidates
             </a>
         </div>
     </div>

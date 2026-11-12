@@ -4,16 +4,16 @@
 
 {% block body %}
     <div class="container" style="padding: 2rem; max-width: 800px; margin: auto; font-family: sans-serif;">
-        <h1 style="color: #1f2937;">Available Job Listings</h1>
+        <h1 style="color: #1f2937;">Available Job Offers</h1>
 
         {% if jobs is empty %}
             <p style="color: #6b7280; margin-top: 1rem;">No job listings found in the database.</p>
         {% else %}
-            <table style="width: 100%; border-collapse: collapse; margin-top: 1.5rem;">
+            <table style="width: 100%; border-collapse: collapse; margin-top: 1.5rem; background: #ffffff; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
                 <thead>
                     <tr style="background-color: #f3f4f6; text-align: left;">
                         <th style="padding: 0.75rem; border-bottom: 2px solid #e5e7eb;">ID</th>
-                        <th style="padding: 0.75rem; border-bottom: 2px solid #e5e7eb;">Title</th>
+                        <th style="padding: 0.75rem; border-bottom: 2px solid #e5e7eb;">Job Title</th>
                         <th style="padding: 0.75rem; border-bottom: 2px solid #e5e7eb;">Actions</th>
                     </tr>
                 </thead>
@@ -23,9 +23,8 @@
                             <td style="padding: 0.75rem;">{{ job.id }}</td>
                             <td style="padding: 0.75rem;">{{ job.title ?? 'N/A' }}</td>
                             <td style="padding: 0.75rem;">
-                                {# Active link pointing to the show summary route #}
                                 <a href="{{ path('app_job_show', {id: job.id}) }}" style="color: #2563eb; text-decoration: none; font-weight: 500;">
-                                    View Summary
+                                    View Job Summary
                                 </a>
                             </td>
                         </tr>
@@ -33,5 +32,9 @@
                 </tbody>
             </table>
         {% endif %}
+
+        <div style="margin-top: 2rem;">
+            <a href="{{ path('app_home') }}" style="color: #4b5563; text-decoration: none; font-weight: 500;">&larr; Back to Home</a>
+        </div>
     </div>
 {% endblock %}
