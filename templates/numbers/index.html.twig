@@ -1,0 +1,29 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Numbers Listing{% endblock %}
+
+{% block body %}
+    <div class="container" style="padding: 2rem; max-width: 600px; margin: auto; font-family: sans-serif;">
+        <h1 style="color: #1f2937; text-align: center;">Generated Numbers Listing</h1>
+        
+        <div style="display: flex; justify-content: space-between; background: #f3f4f6; padding: 1rem; border-radius: 8px; margin: 1.5rem 0;">
+            <div><strong>Min:</strong> {{ min }}</div>
+            <div><strong>Max:</strong> {{ max }}</div>
+            <div><strong>Average:</strong> {{ average }}</div>
+        </div>
+
+        <ul style="list-style: none; padding: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+            {% for number in numbers %}
+                <li style="background: #ffffff; border: 1px solid #e5e7eb; padding: 1rem; text-align: center; font-size: 1.5rem; font-weight: bold; color: #2563eb; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                    {{ number }}
+                </li>
+            {% endfor %}
+        </ul>
+
+        <div style="text-align: center; margin-top: 2rem;">
+            <a href="{{ path('app_numbers') }}" style="display: inline-block; padding: 0.75rem 1.5rem; background-color: #2563eb; color: white; text-decoration: none; border-radius: 0.375rem; font-weight: 500;">
+                Generate New List
+            </a>
+        </div>
+    </div>
+{% endblock %}

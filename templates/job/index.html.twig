@@ -1,71 +1,37 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Liste des Offres d'Emploi{% endblock %}
+{% block title %}Job Listings{% endblock %}
 
 {% block body %}
-<div class="container mt-4">
-    <!-- Bannière / Image intégrée -->
-    <div class="card shadow-sm border-0 rounded-4 overflow-hidden mb-4 bg-dark text-white">
-        <div class="row g-0 align-items-center">
-            <div class="col-md-5">
-                <img src="{{ asset('images/images.jpg') }}" alt="Illustration du projet" class="img-fluid h-100 w-100 object-fit-cover" style="max-height: 250px;">
-            </div>
-            <div class="col-md-7 p-4">
-                <h2 class="fw-bold mb-2">Bienvenue sur la plateforme d'emploi</h2>
-                <p class="text-white-50 mb-3">Découvrez les meilleures opportunités de carrière et gérez vos candidatures en toute simplicité.</p>
-                {% if app.user %}
-                    <a href="{{ path('app_job_new') }}" class="btn btn-light rounded-pill px-4 fw-bold text-primary">Publier une offre</a>
-                {% endif %}
-            </div>
-        </div>
-    </div>
+    <div class="container" style="padding: 2rem; max-width: 800px; margin: auto; font-family: sans-serif;">
+        <h1 style="color: #1f2937;">Available Job Listings</h1>
 
-    <!-- Barre de recherche et Titre -->
-    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
-        <h1 class="fw-bold text-dark mb-0">Offres d'emploi disponibles</h1>
-        
-        <!-- Formulaire de recherche -->
-        <form action="{{ path('app_job_index') }}" method="GET" class="d-flex gap-2">
-            <input type="text" name="q" value="{{ search ?? '' }}" class="form-control rounded-pill px-4" placeholder="Rechercher un job...">
-            <button type="submit" class="btn btn-primary rounded-pill px-4">Rechercher</button>
-            {% if search %}
-                <a href="{{ path('app_job_index') }}" class="btn btn-outline-secondary rounded-pill">Réinitialiser</a>
-            {% endif %}
-        </form>
-    </div>
-
-    {% for message in app.flashes('success') %}
-        <div class="alert alert-success alert-dismissible fade show rounded-4 shadow-sm" role="alert">
-            {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    {% endfor %}
-
-    <!-- Liste des Jobs -->
-    <div class="row">
-        {% for job in jobs %}
-            <div class="col-md-4 mb-4">
-                <div class="card shadow-sm border-0 rounded-4 h-100 p-3 bg-white">
-                    <div class="card-body d-flex flex-column">
-                        <span class="badge bg-light text-primary border px-3 py-2 rounded-pill align-self-start mb-2">
-                            {{ job.company ?? 'Entreprise' }}
-                        </span>
-                        <h4 class="card-title fw-bold text-dark mb-2">{{ job.title }}</h4>
-                        <p class="card-text text-muted small flex-grow-1">{{ job.description|slice(0, 100) }}...</p>
-                        <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
-                            <span class="text-muted small"><i class="bi bi-geo-alt me-1"></i>{{ job.location ?? 'Remote' }}</span>
-                            <a href="{{ path('app_job_show', {'id': job.id}) }}" class="btn btn-outline-primary btn-sm rounded-pill px-3">Détails</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        {% if jobs is empty %}
+            <p style="color: #6b7280; margin-top: 1rem;">No job listings found in the database.</p>
         {% else %}
-            <div class="col-12">
-                <div class="text-center py-5 bg-white rounded-4 shadow-sm">
-                    <p class="text-muted fs-5 mb-0">Aucune offre d'emploi trouvée.</p>
-                </div>
-            </div>
-        {% endfor %}
+            <table style="width: 100%; border-collapse: collapse; margin-top: 1.5rem;">
+                <thead>
+                    <tr style="background-color: #f3f4f6; text-align: left;">
+                        <th style="padding: 0.75rem; border-bottom: 2px solid #e5e7eb;">ID</th>
+                        <th style="padding: 0.75rem; border-bottom: 2px solid #e5e7eb;">Title</th>
+                        <th style="padding: 0.75rem; border-bottom: 2px solid #e5e7eb;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for job in jobs %}
+                        <tr style="border-bottom: 1px solid #e5e7eb;">
+                            <td style="padding: 0.75rem;">{{ job.id }}</td>
+                            <td style="padding: 0.75rem;">{{ job.title ?? 'N/A' }}</td>
+                            <td style="padding: 0.75rem;">
+                                {# Active link pointing to the show summary route #}
+                                <a href="{{ path('app_job_show', {id: job.id}) }}" style="color: #2563eb; text-decoration: none; font-weight: 500;">
+                                    View Summary
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
     </div>
-</div>
 {% endblock %}

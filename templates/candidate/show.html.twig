@@ -1,0 +1,21 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Candidate Summary{% endblock %}
+
+{% block body %}
+    <div class="container" style="padding: 2rem; max-width: 600px; margin: auto; font-family: sans-serif;">
+        <h1 style="color: #1f2937; margin-bottom: 1.5rem;">Candidate Summary Details</h1>
+        
+        <div style="background: #ffffff; border: 1px solid #e5e7eb; padding: 1.5rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <p style="margin-bottom: 1rem;"><strong>ID:</strong> {{ candidate.id }}</p>
+            <p style="margin-bottom: 1rem;"><strong>Email:</strong> {{ candidate.email ?? candidate.userIdentifier ?? 'N/A' }}</p>
+            <p style="margin-bottom: 1rem;"><strong>Roles:</strong> {{ candidate.roles ? candidate.roles|json_encode : 'None' }}</p>
+        </div>
+
+        <div style="margin-top: 1.5rem;">
+            <a href="{{ path('app_candidate_index') }}" style="display: inline-block; padding: 0.6rem 1.2rem; background-color: #4b5563; color: white; text-decoration: none; border-radius: 0.375rem; font-weight: 500;">
+                &larr; Back to Candidates List
+            </a>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Candidates List{% endblock %}
+
+{% block body %}
+    <div class="container" style="padding: 2rem; max-width: 800px; margin: auto; font-family: sans-serif;">
+        <h1 style="color: #1f2937;">Candidate Listings</h1>
+
+        {% if candidates is empty %}
+            <p style="color: #6b7280; margin-top: 1rem;">No candidates found in the database.</p>
+        {% else %}
+            <table style="width: 100%; border-collapse: collapse; margin-top: 1.5rem; background: #ffffff; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                <thead>
+                    <tr style="background-color: #f3f4f6; text-align: left;">
+                        <th style="padding: 0.75rem; border-bottom: 2px solid #e5e7eb;">ID</th>
+                        <th style="padding: 0.75rem; border-bottom: 2px solid #e5e7eb;">Email / Name</th>
+                        <th style="padding: 0.75rem; border-bottom: 2px solid #e5e7eb;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for candidate in candidates %}
+                        <tr style="border-bottom: 1px solid #e5e7eb;">
+                            <td style="padding: 0.75rem;">{{ candidate.id }}</td>
+                            <td style="padding: 0.75rem;">{{ candidate.email ?? candidate.userIdentifier ?? 'N/A' }}</td>
+                            <td style="padding: 0.75rem;">
+                                <a href="{{ path('app_candidate_show', {id: candidate.id}) }}" style="color: #2563eb; text-decoration: none; font-weight: 500;">
+                                    View Summary
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+    </div>
+{% endblock %}
