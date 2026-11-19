@@ -1,37 +1,213 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Candidate Profile #{{ candidate.id }} | TechPortal{% endblock %}
+{% block title %}{{ job.title ?? 'Job Summary Details' }} | CS Career Hub{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .dossier-shell {
+        max-width: 860px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    .dossier-header-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .dossier-page-title {
+        margin: 0;
+        font-size: 1.95rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        color: #f8fafc;
+    }
+
+    .dossier-card {
+        position: relative;
+        overflow: hidden;
+        background: radial-gradient(circle at 90% 10%, rgba(251, 191, 36, 0.12), transparent 45%),
+                    radial-gradient(circle at 10% 90%, rgba(56, 189, 248, 0.12), transparent 45%),
+                    linear-gradient(160deg, #111827 0%, #090e1a 100%);
+        border: 1px solid rgba(148, 163, 184, 0.24);
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 24px 55px rgba(0, 0, 0, 0.6);
+    }
+
+    .dossier-top-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        padding-bottom: 1.25rem;
+        margin-bottom: 1.5rem;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+    }
+
+    .dossier-id-chip {
+        font-family: 'Consolas', 'Courier New', monospace;
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #fcd34d;
+        background: rgba(245, 158, 11, 0.14);
+        border: 1px solid rgba(245, 158, 11, 0.35);
+        padding: 0.35rem 0.75rem;
+        border-radius: 8px;
+    }
+
+    .dossier-status-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: #34d399;
+        background: rgba(16, 185, 129, 0.14);
+        border: 1px solid rgba(16, 185, 129, 0.32);
+        padding: 0.35rem 0.8rem;
+        border-radius: 999px;
+    }
+
+    .dossier-field-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .dossier-meta-box {
+        background: rgba(15, 23, 42, 0.82);
+        border: 1px solid rgba(148, 163, 184, 0.16);
+        border-radius: 12px;
+        padding: 1rem 1.15rem;
+    }
+
+    .dossier-label {
+        display: block;
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.09em;
+        color: #94a3b8;
+        margin-bottom: 0.4rem;
+    }
+
+    .dossier-value-strong {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #f8fafc;
+        margin: 0;
+    }
+
+    .dossier-description-panel {
+        background: rgba(6, 10, 19, 0.85);
+        border: 1px solid rgba(56, 189, 248, 0.22);
+        border-left: 4px solid #38bdf8;
+        border-radius: 12px;
+        padding: 1.35rem 1.5rem;
+        margin-bottom: 1.75rem;
+    }
+
+    .dossier-description-text {
+        margin: 0;
+        font-size: 1rem;
+        line-height: 1.7;
+        color: #e2e8f0;
+    }
+
+    .dossier-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.85rem;
+        align-items: center;
+    }
+
+    .dossier-back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.7rem 1.25rem;
+        border-radius: 9px;
+        background: #1e293b;
+        border: 1px solid #475569;
+        color: #f8fafc;
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-decoration: none;
+        transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+    }
+
+    .dossier-back-btn:hover {
+        background: #334155;
+        border-color: #94a3b8;
+        transform: translateY(-1px);
+    }
+
+    .dossier-secondary-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.7rem 1.2rem;
+        border-radius: 9px;
+        background: rgba(56, 189, 248, 0.12);
+        border: 1px solid rgba(56, 189, 248, 0.35);
+        color: #7dd3fc;
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-decoration: none;
+        transition: background-color 0.2s ease;
+    }
+
+    .dossier-secondary-link:hover {
+        background: rgba(56, 189, 248, 0.22);
+        color: #e0f2fe;
+    }
+</style>
+{% endblock %}
 
 {% block body %}
-    {% set identifier = candidate.email ?? candidate.userIdentifier ?? 'N/A' %}
-    <div style="max-width: 650px; margin: 0 auto;">
-        <div style="background: var(--bg-card); border: 1px solid var(--border-color); padding: 2rem; border-radius: 12px;">
-            <div style="display: flex; align-items: center; gap: 1.25rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1.5rem; margin-bottom: 1.5rem;">
-                <div style="width: 64px; height: 64px; border-radius: 50%; background: var(--accent-emerald); color: #064e3b; font-size: 1.75rem; font-weight: 700; display: flex; align-items: center; justify-content: center;">
-                    {{ identifier|slice(0, 1)|upper }}
+    <div class="dossier-shell">
+        <div class="dossier-header-row">
+            <h1 class="dossier-page-title">Job Summary Details</h1>
+            <a href="{{ path('app_job_index') }}" class="dossier-back-btn">&larr; Back to Listings</a>
+        </div>
+
+        <div class="dossier-card">
+            <div class="dossier-top-meta">
+                <span class="dossier-id-chip">ID: {{ job.id }} &bull; SECTOR-CS</span>
+                <span class="dossier-status-chip">&#9679; Active Requisition</span>
+            </div>
+
+            <div class="dossier-field-grid">
+                <div class="dossier-meta-box">
+                    <span class="dossier-label">Position Identifier</span>
+                    <p class="dossier-value-strong">#{{ job.id }}</p>
                 </div>
-                <div>
-                    <span style="font-size: 0.8rem; color: var(--accent-emerald); font-weight: 600; text-transform: uppercase;">Candidate ID #{{ candidate.id }}</span>
-                    <h1 style="margin: 0.25rem 0 0; font-size: 1.5rem;">{{ identifier }}</h1>
+
+                <div class="dossier-meta-box">
+                    <span class="dossier-label">Role Title</span>
+                    <p class="dossier-value-strong">{{ job.title ?? 'N/A' }}</p>
                 </div>
             </div>
 
-            <div style="background: var(--bg-main); padding: 1.25rem; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 1.75rem;">
-                <div style="margin-bottom: 1rem;">
-                    <span style="color: var(--text-secondary); font-size: 0.85rem; display: block; margin-bottom: 0.35rem;">Assigned System Roles</span>
-                    {% for role in candidate.roles %}
-                        <span style="display: inline-block; font-size: 0.8rem; background: rgba(59, 130, 246, 0.15); color: var(--accent-blue); padding: 0.25rem 0.65rem; border-radius: 4px; margin-right: 0.4rem; font-weight: 600;">
-                            {{ role }}
-                        </span>
-                    {% endfor %}
-                </div>
-                <div>
-                    <span style="color: var(--text-secondary); font-size: 0.85rem; display: block; margin-bottom: 0.25rem;">Account Status</span>
-                    <span style="color: var(--accent-emerald); font-weight: 600; font-size: 0.95rem;">● Verified Profile</span>
-                </div>
+            <div class="dossier-description-panel">
+                <span class="dossier-label" style="color: #7dd3fc;">Mission & Technical Description</span>
+                <p class="dossier-description-text">
+                    {{ job.description ?? 'No description provided for this job.' }}
+                </p>
             </div>
 
-            <a href="{{ path('app_candidate_index') }}" class="btn btn-slate">&larr; Back to Candidates List</a>
+            <div class="dossier-actions">
+                <a href="{{ path('app_job_index') }}" class="dossier-back-btn">&larr; Back to Listings</a>
+                <a href="{{ path('app_candidate_index') }}" class="dossier-secondary-link">Browse Candidates &rarr;</a>
+                <a href="{{ path('app_numbers') }}" class="dossier-secondary-link">Market Benchmarks &rarr;</a>
+            </div>
         </div>
     </div>
 {% endblock %}
