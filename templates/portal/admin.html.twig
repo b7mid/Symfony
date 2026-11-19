@@ -1,0 +1,134 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Admin Portal | CS Career Hub{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .admin-wrap {
+        max-width: 960px;
+        margin: 0 auto;
+    }
+    .admin-box {
+        background: radial-gradient(circle at 15% 15%, rgba(245, 158, 11, 0.14), transparent 45%),
+                    linear-gradient(160deg, #111827 0%, #070b14 100%);
+        border: 1px solid rgba(245, 158, 11, 0.3);
+        border-radius: 16px;
+        padding: 1.85rem;
+        box-shadow: 0 22px 50px rgba(0, 0, 0, 0.55);
+    }
+    .admin-input-group {
+        margin-bottom: 1rem;
+    }
+    .admin-input-group label {
+        display: block;
+        font-size: 0.78rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        color: #cbd5e1;
+        margin-bottom: 0.4rem;
+    }
+    .admin-input-group input {
+        width: 100%;
+        padding: 0.7rem 0.9rem;
+        border-radius: 8px;
+        border: 1px solid #334155;
+        background: #060a13;
+        color: #f8fafc;
+        font-size: 0.95rem;
+        outline: none;
+    }
+    .admin-input-group input:focus {
+        border-color: #f59e0b;
+    }
+    .flash-msg {
+        padding: 0.85rem 1.1rem;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+        font-weight: 600;
+        font-size: 0.92rem;
+    }
+    .flash-success { background: rgba(16, 185, 129, 0.16); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.35); }
+    .flash-error { background: rgba(239, 68, 68, 0.16); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.35); }
+    .flash-info { background: rgba(56, 189, 248, 0.16); color: #7dd3fc; border: 1px solid rgba(56, 189, 248, 0.35); }
+</style>
+{% endblock %}
+
+{% block body %}
+    <div class="admin-wrap">
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="flash-msg flash-{{ label }}">{{ message }}</div>
+            {% endfor %}
+        {% endfor %}
+
+        {% if not isAdmin %}
+            <div class="admin-box" style="max-width: 480px; margin: 1.5rem auto;">
+                <span style="display:inline-block; font-size:0.75rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:#fbbf24; margin-bottom:0.35rem;">
+                    ❖ Restricted Command Access
+                </span>
+                <h1 style="margin:0 0 0.4rem; font-size:1.75rem; color:#f8fafc;">Admin Login</h1>
+                <p style="margin:0 0 1.4rem; color:#94a3b8; font-size:0.9rem;">
+                    Sign in to unlock exclusive <strong>Candidate Listing</strong> inspection.
+                </p>
+
+                <form action="{{ path('app_admin_portal') }}" method="post">
+                    <div class="admin-input-group">
+                        <label for="admin-user">Username</label>
+                        <input id="admin-user" type="text" name="username" required placeholder="admin">
+                    </div>
+                    <div class="admin-input-group">
+                        <label for="admin-pass">Password</label>
+                        <input id="admin-pass" type="password" name="password" required placeholder="••••••••">
+                    </div>
+                    <button type="submit" class="btn btn-amber" style="width:100%; padding:0.75rem;">Authenticate Admin</button>
+                </form>
+            </div>
+        {% else %}
+            <div class="admin-box">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:1.5rem;">
+                    <div>
+                        <span style="font-size:0.75rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:#fbbf24;">
+                            ❖ Admin Control Active
+                        </span>
+                        <h1 style="margin:0.25rem 0 0; font-size:1.85rem; color:#f8fafc;">Candidate Listing ({{ candidates|length }})</h1>
+                    </div>
+                    <div style="display:flex; gap:0.75rem; flex-wrap:wrap;">
+                        <a href="{{ path('app_candidate_index') }}" class="btn btn-blue">Open Full Candidate Table</a>
+                        <a href="{{ path('app_admin_logout') }}" class="btn btn-slate">Admin Logout</a>
+                    </div>
+                </div>
+
+                {% if candidates is empty %}
+                    <p style="color:#94a3b8; margin:0;">No candidates registered yet.</p>
+                {% else %}
+                    <div style="overflow-x:auto;">
+                        <table style="width:100%; border-collapse:collapse; text-align:left;">
+                            <thead>
+                                <tr style="border-bottom:1px solid #334155; color:#94a3b8; font-size:0.8rem; text-transform:uppercase;">
+                                    <th style="padding:0.8rem;">ID</th>
+                                    <th style="padding:0.8rem;">Candidate</th>
+                                    <th style="padding:0.8rem;">Roles</th>
+                                    <th style="padding:0.8rem; text-align:right;">Dossier</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for candidate in candidates %}
+                                    {% set identifier = candidate.email ?? candidate.userIdentifier ?? 'Unknown' %}
+                                    <tr style="border-bottom:1px solid rgba(51,65,85,0.6);">
+                                        <td style="padding:0.8rem; color:#fbbf24; font-family:monospace;">#{{ candidate.id }}</td>
+                                        <td style="padding:0.8rem; color:#f8fafc; font-weight:600;">{{ identifier }}</td>
+                                        <td style="padding:0.8rem; color:#7dd3fc; font-size:0.85rem;">{{ candidate.roles|join(', ') }}</td>
+                                        <td style="padding:0.8rem; text-align:right;">
+                                            <a href="{{ path('app_candidate_show', {id: candidate.id}) }}" class="btn btn-emerald" style="padding:0.4rem 0.85rem; font-size:0.82rem;">Inspect</a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

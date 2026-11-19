@@ -1,0 +1,148 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Guest Portal | CS Career Hub{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .portal-wrap {
+        max-width: 920px;
+        margin: 0 auto;
+    }
+    .portal-banner {
+        background: radial-gradient(circle at 85% 15%, rgba(56, 189, 248, 0.16), transparent 45%),
+                    linear-gradient(155deg, #0f172a 0%, #070c16 100%);
+        border: 1px solid rgba(56, 189, 248, 0.28);
+        border-radius: 16px;
+        padding: 1.75rem 2rem;
+        margin-bottom: 1.75rem;
+        box-shadow: 0 20px 45px rgba(0, 0, 0, 0.5);
+    }
+    .portal-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+        gap: 1.5rem;
+    }
+    .portal-card {
+        background: #0d1424;
+        border: 1px solid rgba(148, 163, 184, 0.22);
+        border-radius: 14px;
+        padding: 1.65rem;
+        box-shadow: 0 14px 32px rgba(0, 0, 0, 0.4);
+    }
+    .portal-card h2 {
+        margin: 0 0 0.4rem;
+        font-size: 1.25rem;
+        color: #f8fafc;
+    }
+    .portal-card p {
+        margin: 0 0 1.25rem;
+        font-size: 0.9rem;
+        color: #94a3b8;
+    }
+    .portal-group {
+        margin-bottom: 1rem;
+    }
+    .portal-group label {
+        display: block;
+        font-size: 0.78rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: #cbd5e1;
+        margin-bottom: 0.4rem;
+    }
+    .portal-group input {
+        width: 100%;
+        padding: 0.7rem 0.9rem;
+        border-radius: 8px;
+        border: 1px solid #334155;
+        background: #060a13;
+        color: #f8fafc;
+        font-size: 0.95rem;
+        outline: none;
+    }
+    .portal-group input:focus {
+        border-color: #38bdf8;
+    }
+    .flash-msg {
+        padding: 0.85rem 1.1rem;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+        font-weight: 600;
+        font-size: 0.92rem;
+    }
+    .flash-success { background: rgba(16, 185, 129, 0.16); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.35); }
+    .flash-error { background: rgba(239, 68, 68, 0.16); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.35); }
+    .flash-info { background: rgba(56, 189, 248, 0.16); color: #7dd3fc; border: 1px solid rgba(56, 189, 248, 0.35); }
+</style>
+{% endblock %}
+
+{% block body %}
+    <div class="portal-wrap">
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="flash-msg flash-{{ label }}">{{ message }}</div>
+            {% endfor %}
+        {% endfor %}
+
+        <div class="portal-banner">
+            <span style="display:inline-block; font-size:0.75rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:#38bdf8; margin-bottom:0.4rem;">
+                ✦ Guest Candidate Access
+            </span>
+            <h1 style="margin:0 0 0.45rem; font-size:1.9rem; color:#f8fafc;">Guest Account &amp; Job Applications</h1>
+            <p style="margin:0; color:#cbd5e1;">
+                Create a guest account or log in to unlock the <strong>Apply for Job</strong> button on open engineering roles.
+            </p>
+        </div>
+
+        {% if guestEmail %}
+            <div class="portal-card" style="margin-bottom: 1.5rem; border-color: rgba(16, 185, 129, 0.4);">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+                    <div>
+                        <span style="font-size:0.78rem; color:#34d399; font-weight:700; text-transform:uppercase;">● Active Guest Session</span>
+                        <h2 style="margin:0.25rem 0;">Logged in as {{ guestEmail }}</h2>
+                        <p style="margin:0;">Jobs applied this session: <strong>{{ appliedJobs|length }}</strong></p>
+                    </div>
+                    <div style="display:flex; gap:0.75rem; flex-wrap:wrap;">
+                        <a href="{{ path('app_job_index') }}" class="btn btn-amber">Browse Jobs &amp; Apply &rarr;</a>
+                        <a href="{{ path('app_guest_logout') }}" class="btn btn-slate">Log Out</a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        <div class="portal-grid">
+            <div class="portal-card">
+                <h2>Create Guest Account</h2>
+                <p>Register a new guest profile and log in immediately.</p>
+                <form action="{{ path('app_guest_register') }}" method="post">
+                    <div class="portal-group">
+                        <label for="reg-email">Email Address</label>
+                        <input id="reg-email" type="email" name="email" required placeholder="guest@example.com">
+                    </div>
+                    <div class="portal-group">
+                        <label for="reg-password">Password</label>
+                        <input id="reg-password" type="password" name="password" required placeholder="Create a password">
+                    </div>
+                    <button type="submit" class="btn btn-emerald" style="width:100%;">Create Account &amp; Enter</button>
+                </form>
+            </div>
+
+            <div class="portal-card">
+                <h2>Guest Login</h2>
+                <p>Sign in with an existing guest account to apply for jobs.</p>
+                <form action="{{ path('app_guest_login') }}" method="post">
+                    <div class="portal-group">
+                        <label for="login-email">Email Address</label>
+                        <input id="login-email" type="email" name="email" required placeholder="guest@example.com">
+                    </div>
+                    <div class="portal-group">
+                        <label for="login-password">Password</label>
+                        <input id="login-password" type="password" name="password" required placeholder="Enter your password">
+                    </div>
+                    <button type="submit" class="btn btn-blue" style="width:100%;">Log In as Guest</button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

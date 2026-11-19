@@ -6,7 +6,7 @@
 <style>
     .astro-hero-wrap {
         position: relative;
-        max-width: 960px;
+        max-width: 980px;
         margin: 0 auto 2.5rem;
         border-radius: 18px;
         overflow: hidden;
@@ -33,7 +33,7 @@
 
     .astro-banner-frame {
         position: relative;
-        height: 290px;
+        height: 280px;
         overflow: hidden;
         border-bottom: 1px solid rgba(148, 163, 184, 0.2);
     }
@@ -61,7 +61,7 @@
         position: relative;
         z-index: 2;
         padding: 0 2rem 2.25rem;
-        margin-top: -3.5rem;
+        margin-top: -3.25rem;
     }
 
     .astro-eyebrow {
@@ -70,19 +70,19 @@
         gap: 0.5rem;
         padding: 0.35rem 0.85rem;
         border-radius: 999px;
-        background: rgba(15, 23, 42, 0.88);
+        background: rgba(15, 23, 42, 0.9);
         border: 1px solid rgba(251, 191, 36, 0.35);
         color: #fcd34d;
         font-size: 0.75rem;
         font-weight: 700;
         letter-spacing: 0.1em;
         text-transform: uppercase;
-        margin-bottom: 0.9rem;
+        margin-bottom: 0.85rem;
     }
 
     .astro-title {
-        margin: 0 0 0.65rem;
-        font-size: clamp(1.85rem, 3.5vw, 2.65rem);
+        margin: 0 0 0.6rem;
+        font-size: clamp(1.85rem, 3.5vw, 2.6rem);
         font-weight: 800;
         letter-spacing: -0.02em;
         color: #f8fafc;
@@ -96,29 +96,29 @@
     }
 
     .astro-subtitle {
-        margin: 0 auto 1.75rem;
-        max-width: 660px;
+        margin: 0 auto 1.65rem;
+        max-width: 680px;
         color: #cbd5e1;
-        font-size: 1rem;
+        font-size: 0.98rem;
         line-height: 1.6;
     }
 
     .astro-actions {
         display: flex;
         justify-content: center;
-        gap: 0.9rem;
+        gap: 0.85rem;
         flex-wrap: wrap;
-        margin-bottom: 2.25rem;
+        margin-bottom: 2.1rem;
     }
 
     .astro-btn {
         display: inline-flex;
         align-items: center;
         gap: 0.5rem;
-        padding: 0.8rem 1.45rem;
+        padding: 0.78rem 1.35rem;
         border-radius: 10px;
         font-weight: 700;
-        font-size: 0.92rem;
+        font-size: 0.9rem;
         text-decoration: none;
         transition: transform 0.18s ease, box-shadow 0.2s ease, filter 0.2s ease;
     }
@@ -140,29 +140,35 @@
         box-shadow: 0 8px 24px rgba(245, 158, 11, 0.3);
     }
 
-    .astro-btn-candidates {
+    .astro-btn-guest {
         background: linear-gradient(135deg, #059669, #10b981);
         color: #04130e;
         box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
     }
 
+    .astro-btn-admin {
+        background: linear-gradient(135deg, #7c3aed, #a855f7);
+        color: #ffffff;
+        box-shadow: 0 8px 24px rgba(124, 58, 237, 0.32);
+    }
+
     .astro-metrics-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 1.15rem;
+        grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+        gap: 1.1rem;
         text-align: left;
     }
 
     .astro-stat-card {
-        background: rgba(15, 23, 42, 0.85);
+        background: rgba(15, 23, 42, 0.86);
         border: 1px solid rgba(148, 163, 184, 0.18);
         border-radius: 12px;
-        padding: 1.25rem;
+        padding: 1.2rem;
         backdrop-filter: blur(10px);
     }
 
     .astro-stat-label {
-        font-size: 0.75rem;
+        font-size: 0.74rem;
         text-transform: uppercase;
         letter-spacing: 0.08em;
         color: #94a3b8;
@@ -170,9 +176,9 @@
     }
 
     .astro-stat-value {
-        font-size: 2rem;
+        font-size: 1.9rem;
         font-weight: 800;
-        margin: 0.35rem 0 0.2rem;
+        margin: 0.3rem 0 0.2rem;
         color: #f8fafc;
     }
 
@@ -194,10 +200,10 @@
         </div>
 
         <div class="astro-hero-content" style="text-align: center;">
-            <div class="astro-eyebrow">✦ Orbital Engineering & Talent Matrix</div>
+            <div class="astro-eyebrow">✦ Orbital Engineering &amp; Talent Matrix</div>
             <h1 class="astro-title">Welcome to <span>CS Career Hub</span></h1>
             <p class="astro-subtitle">
-                Navigate high-signal computer science job offers, inspect candidate dossiers, and analyze real-world engineering market statistics from a unified dark command deck.
+                Explore computer science market statistics and active job offers, create a guest account to apply for positions, or sign in as admin to inspect candidate listings.
             </p>
 
             <div class="astro-actions">
@@ -207,28 +213,31 @@
                 <a href="{{ path('app_job_index') }}" class="astro-btn astro-btn-jobs">
                     <span>✦</span> View Job Offers
                 </a>
-                <a href="{{ path('app_candidate_index') }}" class="astro-btn astro-btn-candidates">
-                    <span>❖</span> View Candidates
+                <a href="{{ path('app_guest_portal') }}" class="astro-btn astro-btn-guest">
+                    <span>❖</span> Guest Page
+                </a>
+                <a href="{{ path('app_admin_portal') }}" class="astro-btn astro-btn-admin">
+                    <span>⛨</span> Admin Page
                 </a>
             </div>
 
             <div class="astro-metrics-grid">
                 <div class="astro-stat-card">
-                    <div class="astro-stat-label" style="color: #fbbf24;">Active Positions</div>
+                    <div class="astro-stat-label" style="color: #fbbf24;">Active Job Offers</div>
                     <div class="astro-stat-value" style="color: #fde68a;">{{ jobCount is defined ? jobCount : '—' }}</div>
-                    <p class="astro-stat-hint">Live roles indexed in database</p>
+                    <p class="astro-stat-hint">Open CS engineering roles</p>
                 </div>
 
                 <div class="astro-stat-card">
-                    <div class="astro-stat-label" style="color: #34d399;">Candidate Profiles</div>
-                    <div class="astro-stat-value" style="color: #a7f3d0;">{{ candidateCount is defined ? candidateCount : '—' }}</div>
-                    <p class="astro-stat-hint">Registered applicants & accounts</p>
+                    <div class="astro-stat-label" style="color: #34d399;">Guest Portal</div>
+                    <div class="astro-stat-value" style="color: #a7f3d0;">Apply</div>
+                    <p class="astro-stat-hint">Register, log in &amp; apply to jobs</p>
                 </div>
 
                 <div class="astro-stat-card">
-                    <div class="astro-stat-label" style="color: #38bdf8;">Market Telemetry</div>
-                    <div class="astro-stat-value" style="color: #bae6fd;">6 Core</div>
-                    <p class="astro-stat-hint">Salary, growth & stack indicators</p>
+                    <div class="astro-stat-label" style="color: #c084fc;">Admin Console</div>
+                    <div class="astro-stat-value" style="color: #e9d5ff;">{{ candidateCount is defined ? candidateCount : '—' }}</div>
+                    <p class="astro-stat-hint">Protected candidate listing (admin/admin)</p>
                 </div>
             </div>
         </div>

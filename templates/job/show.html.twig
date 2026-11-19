@@ -162,21 +162,61 @@
         font-weight: 600;
         font-size: 0.9rem;
         text-decoration: none;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
     }
 
     .astro-job-btn-link:hover {
         background-color: rgba(56, 189, 248, 0.24) !important;
         color: #e0f2fe !important;
     }
+
+    .astro-job-btn-apply {
+        background-color: rgba(16, 185, 129, 0.2) !important;
+        border: 1px solid rgba(16, 185, 129, 0.5) !important;
+        color: #6ee7b7 !important;
+    }
+
+    .astro-job-btn-apply:hover {
+        background-color: rgba(16, 185, 129, 0.32) !important;
+        color: #a7f3d0 !important;
+    }
+
+    .astro-job-btn-guest {
+        background-color: rgba(245, 158, 11, 0.16) !important;
+        border: 1px solid rgba(245, 158, 11, 0.45) !important;
+        color: #fcd34d !important;
+    }
+
+    .astro-flash {
+        margin-bottom: 1.25rem;
+        padding: 0.85rem 1.15rem;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.92rem;
+        background: rgba(16, 185, 129, 0.16);
+        color: #6ee7b7;
+        border: 1px solid rgba(16, 185, 129, 0.35);
+    }
 </style>
 {% endblock %}
 
 {% block body %}
+    {% set appliedJobs = app.session.get('applied_jobs', []) %}
+    {% set isGuestLoggedIn = app.session.get('guest_authenticated', false) %}
+    {% set alreadyApplied = job.id in appliedJobs %}
+
     <div class="astro-job-dossier">
         <div class="astro-job-topbar">
             <h1 class="astro-job-heading">Job Summary Details</h1>
             <a href="{{ path('app_job_index') }}" class="astro-job-btn-back">&larr; Back to Listings</a>
         </div>
+
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="astro-flash">{{ message }}</div>
+            {% endfor %}
+        {% endfor %}
 
         <div class="astro-job-panel">
             <div class="astro-job-meta-strip">
@@ -204,9 +244,20 @@
             </div>
 
             <div class="astro-job-actions">
+                {% if isGuestLoggedIn %}
+                    <form action="{{ path('app_job_apply', {id: job.id}) }}" method="post" style="display:inline; margin:0;">
+                        <button type="submit" class="astro-job-btn-link astro-job-btn-apply">
+                            {{ alreadyApplied ? '✓ Applied for Job' : '✦ Apply for Job' }}
+                        </button>
+                    </form>
+                {% else %}
+                    <a href="{{ path('app_guest_portal') }}" class="astro-job-btn-link astro-job-btn-guest">
+                        Guest Login to Apply &rarr;
+                    </a>
+                {% endif %}
+
                 <a href="{{ path('app_job_index') }}" class="astro-job-btn-back">&larr; Back to Listings</a>
-                <a href="{{ path('app_candidate_index') }}" class="astro-job-btn-link">Browse Candidates &rarr;</a>
-                <a href="{{ path('app_numbers') }}" class="astro-job-btn-link">CS Market Stats &rarr;</a>
+                <a href="{{ path('app_numbers') }}" class="astro-job-btn-link">View Numbers &rarr;</a>
             </div>
         </div>
     </div>
