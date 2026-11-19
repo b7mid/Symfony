@@ -246,6 +246,7 @@
             <div class="astro-job-actions">
                 {% if isGuestLoggedIn %}
                     <form action="{{ path('app_job_apply', {id: job.id}) }}" method="post" style="display:inline; margin:0;">
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('apply_job_' ~ job.id) }}">
                         <button type="submit" class="astro-job-btn-link astro-job-btn-apply">
                             {{ alreadyApplied ? '✓ Applied for Job' : '✦ Apply for Job' }}
                         </button>

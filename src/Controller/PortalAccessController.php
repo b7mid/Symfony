@@ -19,12 +19,27 @@ class PortalAccessController extends AbstractController
     public function unifiedAccess(
         Request $request,
         UserRepository $userRepository,
+        JobRepository $jobRepository,
         EntityManagerInterface $entityManager,
         UserPasswordHasherInterface $passwordHasher
     ): Response {
         $session = $request->getSession();
 
         if ($request->isMethod('POST')) {
+            $token = (string) $request->request->get('_csrf_token', '');
+            if (!$this->isCsrfTokenValid('unified_access_form', $token)) {
+                $this->addFlash('error', 'Invalid security token. Please refresh and try again.');
+                return $this->redirectToRoute('app_unified_access');
+            }
+
+            $failedAttempts = (int) $session->get('auth_failed_attempts', 0);
+            $lockUntil = (int) $session->get('auth_lock_until', 0);
+            if ($lockUntil > time()) {
+                $remaining = $lockUntil - time();
+                $this->addFlash('error', 'Too many failed attempts. Please wait ' . $remaining . ' seconds before trying again.');
+                return $this->redirectToRoute('app_unified_access');
+            }
+
             $mode = (string) $request->request->get('mode', 'login');
             $identifier = trim((string) $request->request->get('identifier', ''));
             $password = (string) $request->request->get('password', '');
@@ -34,26 +49,34 @@ class PortalAccessController extends AbstractController
                 return $this->redirectToRoute('app_unified_access');
             }
 
-            // Admin check (both login and register attempts with admin credentials are checked securely)
+            // Admin check
             if ($identifier === 'admin') {
                 if ($password === 'admin') {
+                    $session->remove('auth_failed_attempts');
+                    $session->remove('auth_lock_until');
                     $session->remove('guest_authenticated');
                     $session->remove('guest_user_email');
                     $session->set('admin_authenticated', true);
                     $session->set('admin_username', 'admin');
 
-                    $this->addFlash('success', 'Authenticated as Admin. Welcome to the Admin Portal.');
+                    $this->addFlash('success', 'Authenticated as Admin.');
                     return $this->redirectToRoute('app_admin_portal');
                 }
 
+                $this->recordFailedAttempt($session, $failedAttempts);
                 $this->addFlash('error', 'Invalid credentials.');
                 return $this->redirectToRoute('app_unified_access');
             }
 
             // Guest account creation flow
             if ($mode === 'register') {
+                if (strlen($password) < 6) {
+                    $this->addFlash('error', 'Choose a password with at least 6 characters.');
+                    return $this->redirectToRoute('app_unified_access');
+                }
+
                 if ($userRepository->findOneBy(['email' => $identifier])) {
-                    $this->addFlash('error', 'An account with this identifier already exists. Switch to Sign In.');
+                    $this->addFlash('error', 'An account with this identifier already exists. Switch to Log In.');
                     return $this->redirectToRoute('app_unified_access');
                 }
 
@@ -71,48 +94,70 @@ class PortalAccessController extends AbstractController
                 $entityManager->persist($user);
                 $entityManager->flush();
 
+                $session->remove('auth_failed_attempts');
+                $session->remove('auth_lock_until');
                 $session->remove('admin_authenticated');
                 $session->remove('admin_username');
                 $session->set('guest_authenticated', true);
                 $session->set('guest_user_email', $identifier);
 
-                $this->addFlash('success', 'Guest account created. You are now logged in as ' . $identifier . ' and can apply for jobs.');
+                $this->addFlash('success', 'Guest account created. You are now logged in as ' . $identifier . '.');
                 return $this->redirectToRoute('app_job_index');
             }
 
             // Guest login flow
             $user = $userRepository->findOneBy(['email' => $identifier]);
             if (!$user) {
+                $this->recordFailedAttempt($session, $failedAttempts);
                 $this->addFlash('error', 'Account not found. Create a guest account if you do not have one yet.');
                 return $this->redirectToRoute('app_unified_access');
             }
 
             if (method_exists($user, 'getPassword') && $user->getPassword()) {
                 if (!$passwordHasher->isPasswordValid($user, $password)) {
+                    $this->recordFailedAttempt($session, $failedAttempts);
                     $this->addFlash('error', 'Invalid credentials.');
                     return $this->redirectToRoute('app_unified_access');
                 }
             }
 
+            $session->remove('auth_failed_attempts');
+            $session->remove('auth_lock_until');
             $session->remove('admin_authenticated');
             $session->remove('admin_username');
             $session->set('guest_authenticated', true);
             $session->set('guest_user_email', $identifier);
 
-            $this->addFlash('success', 'Logged in as ' . $identifier . '. You can now apply for jobs.');
+            $this->addFlash('success', 'Logged in as ' . $identifier . '.');
             return $this->redirectToRoute('app_job_index');
+        }
+
+        $appliedIds = $session->get('applied_jobs', []);
+        $appliedJobsList = [];
+        foreach ($appliedIds as $jobId) {
+            $foundJob = $jobRepository->find($jobId);
+            if ($foundJob) {
+                $appliedJobsList[] = $foundJob;
+            }
         }
 
         return $this->render('portal/access.html.twig', [
             'isAdmin' => (bool) $session->get('admin_authenticated', false),
             'guestEmail' => $session->get('guest_user_email'),
-            'appliedCount' => count($session->get('applied_jobs', [])),
+            'appliedCount' => count($appliedJobsList),
+            'appliedJobsList' => $appliedJobsList,
         ]);
     }
 
     #[Route('/jobs/{id}/apply', name: 'app_job_apply', requirements: ['id' => '\d+'], methods: ['POST'])]
     public function applyForJob(int $id, Request $request, JobRepository $jobRepository): Response
     {
+        $token = (string) $request->request->get('_csrf_token', '');
+        if (!$this->isCsrfTokenValid('apply_job_' . $id, $token)) {
+            $this->addFlash('error', 'Invalid application token. Please try again.');
+            return $this->redirectToRoute('app_job_show', ['id' => $id]);
+        }
+
         $session = $request->getSession();
         $isGuest = (bool) $session->get('guest_authenticated', false);
         $guestEmail = (string) $session->get('guest_user_email', '');
@@ -179,5 +224,15 @@ class PortalAccessController extends AbstractController
 
         $this->addFlash('info', 'You have been signed out.');
         return $this->redirectToRoute('app_unified_access');
+    }
+
+    private function recordFailedAttempt($session, int $currentAttempts): void
+    {
+        $nextAttempts = $currentAttempts + 1;
+        $session->set('auth_failed_attempts', $nextAttempts);
+        if ($nextAttempts >= 5) {
+            $session->set('auth_lock_until', time() + 30);
+            $session->set('auth_failed_attempts', 0);
+        }
     }
 }
