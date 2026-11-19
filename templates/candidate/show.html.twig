@@ -1,6 +1,8 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{ job.title ?? 'Job Summary Details' }} | CS Career Hub{% endblock %}
+{% set identifier = candidate.email ?? candidate.userIdentifier ?? 'Candidate Profile' %}
+
+{% block title %}{{ identifier }} | CS Career Hub{% endblock %}
 
 {% block stylesheets %}
 <style>
@@ -30,8 +32,8 @@
     .dossier-card {
         position: relative;
         overflow: hidden;
-        background: radial-gradient(circle at 90% 10%, rgba(251, 191, 36, 0.12), transparent 45%),
-                    radial-gradient(circle at 10% 90%, rgba(56, 189, 248, 0.12), transparent 45%),
+        background: radial-gradient(circle at 90% 10%, rgba(16, 185, 129, 0.14), transparent 45%),
+                    radial-gradient(circle at 10% 90%, rgba(56, 189, 248, 0.14), transparent 45%),
                     linear-gradient(160deg, #111827 0%, #090e1a 100%);
         border: 1px solid rgba(148, 163, 184, 0.24);
         border-radius: 16px;
@@ -54,9 +56,9 @@
         font-family: 'Consolas', 'Courier New', monospace;
         font-size: 0.85rem;
         font-weight: 700;
-        color: #fcd34d;
-        background: rgba(245, 158, 11, 0.14);
-        border: 1px solid rgba(245, 158, 11, 0.35);
+        color: #6ee7b7;
+        background: rgba(16, 185, 129, 0.14);
+        border: 1px solid rgba(16, 185, 129, 0.35);
         padding: 0.35rem 0.75rem;
         border-radius: 8px;
     }
@@ -67,11 +69,33 @@
         gap: 0.45rem;
         font-size: 0.82rem;
         font-weight: 700;
-        color: #34d399;
-        background: rgba(16, 185, 129, 0.14);
-        border: 1px solid rgba(16, 185, 129, 0.32);
+        color: #38bdf8;
+        background: rgba(56, 189, 248, 0.14);
+        border: 1px solid rgba(56, 189, 248, 0.32);
         padding: 0.35rem 0.8rem;
         border-radius: 999px;
+    }
+
+    .dossier-profile-banner {
+        display: flex;
+        align-items: center;
+        gap: 1.15rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .dossier-avatar {
+        width: 56px;
+        height: 56px;
+        border-radius: 14px;
+        background: linear-gradient(135deg, #10b981, #0284c7);
+        color: #ffffff;
+        font-size: 1.45rem;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        box-shadow: 0 8px 20px rgba(16, 185, 129, 0.25);
     }
 
     .dossier-field-grid {
@@ -105,20 +129,27 @@
         margin: 0;
     }
 
-    .dossier-description-panel {
+    .dossier-roles-panel {
         background: rgba(6, 10, 19, 0.85);
-        border: 1px solid rgba(56, 189, 248, 0.22);
-        border-left: 4px solid #38bdf8;
+        border: 1px solid rgba(16, 185, 129, 0.24);
+        border-left: 4px solid #10b981;
         border-radius: 12px;
-        padding: 1.35rem 1.5rem;
+        padding: 1.25rem 1.45rem;
         margin-bottom: 1.75rem;
     }
 
-    .dossier-description-text {
-        margin: 0;
-        font-size: 1rem;
-        line-height: 1.7;
-        color: #e2e8f0;
+    .role-pill {
+        display: inline-block;
+        font-family: 'Consolas', 'Courier New', monospace;
+        font-size: 0.8rem;
+        font-weight: 700;
+        padding: 0.3rem 0.7rem;
+        border-radius: 6px;
+        margin-right: 0.45rem;
+        margin-top: 0.25rem;
+        background: rgba(56, 189, 248, 0.14);
+        color: #7dd3fc;
+        border: 1px solid rgba(56, 189, 248, 0.32);
     }
 
     .dossier-actions {
@@ -174,39 +205,51 @@
 {% block body %}
     <div class="dossier-shell">
         <div class="dossier-header-row">
-            <h1 class="dossier-page-title">Job Summary Details</h1>
-            <a href="{{ path('app_job_index') }}" class="dossier-back-btn">&larr; Back to Listings</a>
+            <h1 class="dossier-page-title">Candidate Summary Details</h1>
+            <a href="{{ path('app_candidate_index') }}" class="dossier-back-btn">&larr; Back to Candidates</a>
         </div>
 
         <div class="dossier-card">
             <div class="dossier-top-meta">
-                <span class="dossier-id-chip">ID: {{ job.id }} &bull; SECTOR-CS</span>
-                <span class="dossier-status-chip">&#9679; Active Requisition</span>
+                <span class="dossier-id-chip">ID: {{ candidate.id }} &bull; TALENT-DOSSIER</span>
+                <span class="dossier-status-chip">&#9679; Verified Profile</span>
+            </div>
+
+            <div class="dossier-profile-banner">
+                <div class="dossier-avatar">{{ identifier|slice(0, 1)|upper }}</div>
+                <div>
+                    <span class="dossier-label" style="margin-bottom: 0.15rem;">Candidate Identity</span>
+                    <h2 style="margin: 0; font-size: 1.45rem; color: #f8fafc;">{{ identifier }}</h2>
+                </div>
             </div>
 
             <div class="dossier-field-grid">
                 <div class="dossier-meta-box">
-                    <span class="dossier-label">Position Identifier</span>
-                    <p class="dossier-value-strong">#{{ job.id }}</p>
+                    <span class="dossier-label">Candidate ID</span>
+                    <p class="dossier-value-strong">#{{ candidate.id }}</p>
                 </div>
 
                 <div class="dossier-meta-box">
-                    <span class="dossier-label">Role Title</span>
-                    <p class="dossier-value-strong">{{ job.title ?? 'N/A' }}</p>
+                    <span class="dossier-label">Primary Identifier</span>
+                    <p class="dossier-value-strong">{{ identifier }}</p>
                 </div>
             </div>
 
-            <div class="dossier-description-panel">
-                <span class="dossier-label" style="color: #7dd3fc;">Mission & Technical Description</span>
-                <p class="dossier-description-text">
-                    {{ job.description ?? 'No description provided for this job.' }}
-                </p>
+            <div class="dossier-roles-panel">
+                <span class="dossier-label" style="color: #6ee7b7;">Assigned System Roles</span>
+                {% if candidate.roles is defined and candidate.roles is not empty %}
+                    {% for role in candidate.roles %}
+                        <span class="role-pill">{{ role }}</span>
+                    {% endfor %}
+                {% else %}
+                    <p style="margin: 0.25rem 0 0; color: #94a3b8;">No roles assigned.</p>
+                {% endif %}
             </div>
 
             <div class="dossier-actions">
-                <a href="{{ path('app_job_index') }}" class="dossier-back-btn">&larr; Back to Listings</a>
-                <a href="{{ path('app_candidate_index') }}" class="dossier-secondary-link">Browse Candidates &rarr;</a>
-                <a href="{{ path('app_numbers') }}" class="dossier-secondary-link">Market Benchmarks &rarr;</a>
+                <a href="{{ path('app_candidate_index') }}" class="dossier-back-btn">&larr; Back to Candidates</a>
+                <a href="{{ path('app_job_index') }}" class="dossier-secondary-link">View Job Offers &rarr;</a>
+                <a href="{{ path('app_numbers') }}" class="dossier-secondary-link">CS Market Stats &rarr;</a>
             </div>
         </div>
     </div>
