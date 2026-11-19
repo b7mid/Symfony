@@ -19,7 +19,7 @@ class JobController extends AbstractController
         ]);
     }
 
-    #[Route('/jobs/{id}', name: 'app_job_show')]
+    #[Route('/jobs/{id}', name: 'app_job_show', requirements: ['id' => '\d+'])]
     public function show(int $id, JobRepository $jobRepository): Response
     {
         $job = $jobRepository->find($id);
