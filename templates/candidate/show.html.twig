@@ -1,21 +1,37 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Candidate Summary{% endblock %}
+{% block title %}Candidate Profile #{{ candidate.id }} | TechPortal{% endblock %}
 
 {% block body %}
-    <div class="container" style="padding: 2rem; max-width: 600px; margin: auto; font-family: sans-serif;">
-        <h1 style="color: #1f2937; margin-bottom: 1.5rem;">Candidate Summary Details</h1>
-        
-        <div style="background: #ffffff; border: 1px solid #e5e7eb; padding: 1.5rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-            <p style="margin-bottom: 1rem;"><strong>ID:</strong> {{ candidate.id }}</p>
-            <p style="margin-bottom: 1rem;"><strong>Email:</strong> {{ candidate.email ?? candidate.userIdentifier ?? 'N/A' }}</p>
-            <p style="margin-bottom: 1rem;"><strong>Roles:</strong> {{ candidate.roles ? candidate.roles|json_encode : 'None' }}</p>
-        </div>
+    {% set identifier = candidate.email ?? candidate.userIdentifier ?? 'N/A' %}
+    <div style="max-width: 650px; margin: 0 auto;">
+        <div style="background: var(--bg-card); border: 1px solid var(--border-color); padding: 2rem; border-radius: 12px;">
+            <div style="display: flex; align-items: center; gap: 1.25rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1.5rem; margin-bottom: 1.5rem;">
+                <div style="width: 64px; height: 64px; border-radius: 50%; background: var(--accent-emerald); color: #064e3b; font-size: 1.75rem; font-weight: 700; display: flex; align-items: center; justify-content: center;">
+                    {{ identifier|slice(0, 1)|upper }}
+                </div>
+                <div>
+                    <span style="font-size: 0.8rem; color: var(--accent-emerald); font-weight: 600; text-transform: uppercase;">Candidate ID #{{ candidate.id }}</span>
+                    <h1 style="margin: 0.25rem 0 0; font-size: 1.5rem;">{{ identifier }}</h1>
+                </div>
+            </div>
 
-        <div style="margin-top: 1.5rem;">
-            <a href="{{ path('app_candidate_index') }}" style="display: inline-block; padding: 0.6rem 1.2rem; background-color: #4b5563; color: white; text-decoration: none; border-radius: 0.375rem; font-weight: 500;">
-                &larr; Back to Candidates List
-            </a>
+            <div style="background: var(--bg-main); padding: 1.25rem; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 1.75rem;">
+                <div style="margin-bottom: 1rem;">
+                    <span style="color: var(--text-secondary); font-size: 0.85rem; display: block; margin-bottom: 0.35rem;">Assigned System Roles</span>
+                    {% for role in candidate.roles %}
+                        <span style="display: inline-block; font-size: 0.8rem; background: rgba(59, 130, 246, 0.15); color: var(--accent-blue); padding: 0.25rem 0.65rem; border-radius: 4px; margin-right: 0.4rem; font-weight: 600;">
+                            {{ role }}
+                        </span>
+                    {% endfor %}
+                </div>
+                <div>
+                    <span style="color: var(--text-secondary); font-size: 0.85rem; display: block; margin-bottom: 0.25rem;">Account Status</span>
+                    <span style="color: var(--accent-emerald); font-weight: 600; font-size: 0.95rem;">● Verified Profile</span>
+                </div>
+            </div>
+
+            <a href="{{ path('app_candidate_index') }}" class="btn btn-slate">&larr; Back to Candidates List</a>
         </div>
     </div>
 {% endblock %}

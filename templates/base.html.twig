@@ -1,30 +1,137 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>{% block title %}Welcome!{% endblock %}</title>
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>🧰</text></svg>">
-        {% block stylesheets %}
-        {% endblock %}
-
-        {% block javascripts %}
-        {% endblock %}
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{% block title %}TechPortal | Symfony{% endblock %}</title>
+        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚡</text></svg>">
+        <style>
+            :root {
+                --bg-main: #0f172a;
+                --bg-card: #1e293b;
+                --bg-card-hover: #334155;
+                --text-primary: #f8fafc;
+                --text-secondary: #94a3b8;
+                --accent-blue: #3b82f6;
+                --accent-blue-hover: #2563eb;
+                --accent-emerald: #10b981;
+                --accent-amber: #f59e0b;
+                --border-color: #334155;
+            }
+            * { box-sizing: border-box; }
+            body {
+                margin: 0;
+                font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+                background-color: var(--bg-main);
+                color: var(--text-primary);
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+            }
+            header {
+                background-color: rgba(30, 41, 59, 0.95);
+                border-bottom: 1px solid var(--border-color);
+                padding: 1rem 2.5rem;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                position: sticky;
+                top: 0;
+                z-index: 100;
+                backdrop-filter: blur(8px);
+            }
+            .brand-logo {
+                font-size: 1.35rem;
+                font-weight: 700;
+                letter-spacing: 0.5px;
+                color: var(--text-primary);
+                cursor: default;
+                user-select: none;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+            .brand-badge {
+                background: var(--accent-blue);
+                color: white;
+                font-size: 0.7rem;
+                padding: 0.15rem 0.45rem;
+                border-radius: 4px;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            }
+            nav {
+                display: flex;
+                gap: 1.5rem;
+            }
+            nav a {
+                color: var(--text-secondary);
+                text-decoration: none;
+                font-weight: 500;
+                padding: 0.4rem 0.75rem;
+                border-radius: 6px;
+                transition: all 0.2s ease;
+            }
+            nav a:hover, nav a.active {
+                color: var(--text-primary);
+                background-color: var(--bg-card-hover);
+            }
+            main {
+                flex: 1;
+                width: 100%;
+                max-width: 1100px;
+                margin: 0 auto;
+                padding: 2.5rem 1.5rem;
+            }
+            .btn {
+                display: inline-block;
+                padding: 0.65rem 1.25rem;
+                border-radius: 6px;
+                text-decoration: none;
+                font-weight: 600;
+                font-size: 0.9rem;
+                transition: transform 0.15s ease, background-color 0.2s ease;
+                border: none;
+                cursor: pointer;
+            }
+            .btn:hover { transform: translateY(-1px); }
+            .btn-blue { background-color: var(--accent-blue); color: white; }
+            .btn-blue:hover { background-color: var(--accent-blue-hover); }
+            .btn-emerald { background-color: var(--accent-emerald); color: #064e3b; }
+            .btn-amber { background-color: var(--accent-amber); color: #451a03; }
+            .btn-slate { background-color: var(--bg-card-hover); color: var(--text-primary); }
+            footer {
+                text-align: center;
+                padding: 1.5rem;
+                border-top: 1px solid var(--border-color);
+                color: var(--text-secondary);
+                font-size: 0.85rem;
+            }
+        </style>
+        {% block stylesheets %}{% endblock %}
+        {% block javascripts %}{% endblock %}
     </head>
-    <body style="margin: 0; font-family: sans-serif; background-color: #f9fafb;">
-        <!-- Header with Non-Clickable Logo -->
-        <header style="background-color: #ffffff; border-bottom: 1px solid #e5e7eb; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
-            <div style="font-size: 1.25rem; font-weight: bold; color: #1f2937; cursor: default; user-select: none;">
-                My Symfony Project
+    <body>
+        <header>
+            <div class="brand-logo">
+                <span>CS Career Hub</span>
+                <span class="brand-badge">v2.0</span>
             </div>
             <nav>
-                <a href="{{ path('app_home') }}" style="color: #4b5563; text-decoration: none; margin-left: 1.5rem; font-weight: 500;">Home</a>
-                <a href="{{ path('app_numbers') }}" style="color: #4b5563; text-decoration: none; margin-left: 1.5rem; font-weight: 500;">Numbers</a>
-                <a href="{{ path('app_candidate_index') }}" style="color: #4b5563; text-decoration: none; margin-left: 1.5rem; font-weight: 500;">Candidates</a>
+                {% set current_route = app.request.attributes.get('_route') %}
+                <a href="{{ path('app_home') }}" class="{{ current_route == 'app_home' ? 'active' : '' }}">Home</a>
+                <a href="{{ path('app_numbers') }}" class="{{ current_route == 'app_numbers' ? 'active' : '' }}">CS Market Stats</a>
+                <a href="{{ path('app_job_index') }}" class="{{ current_route starts with 'app_job' ? 'active' : '' }}">Job Offers</a>
+                <a href="{{ path('app_candidate_index') }}" class="{{ current_route starts with 'app_candidate' ? 'active' : '' }}">Candidates</a>
             </nav>
         </header>
 
         <main>
             {% block body %}{% endblock %}
         </main>
+
+        <footer>
+            Computer Science & Engineering Portal &bull; Built with Symfony
+        </footer>
     </body>
 </html>

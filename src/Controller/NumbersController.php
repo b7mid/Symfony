@@ -11,37 +11,48 @@ class NumbersController extends AbstractController
     #[Route('/numbers', name: 'app_numbers')]
     public function index(): Response
     {
-        // Statistical data points regarding Computer Science and Software Engineering jobs
         $csStats = [
             [
-                'title' => 'Average Software Engineer Salary (US)',
+                'title' => 'Average Software Engineer Salary',
                 'value' => '$125,000',
-                'description' => 'The national median annual salary for professional software developers.'
+                'percent' => 83,
+                'color' => '#3b82f6',
+                'description' => 'Median annual compensation across full-stack, backend, and systems engineers.'
             ],
             [
-                'title' => 'Projected Job Growth Rate',
-                'value' => '25%',
-                'description' => 'Expected employment growth for computer and information technology jobs from 2022 to 2032.'
+                'title' => 'Projected Tech Job Growth (10-Yr)',
+                'value' => '+25%',
+                'percent' => 75,
+                'color' => '#10b981',
+                'description' => 'Significantly faster than the average growth rate across all other occupations.'
             ],
             [
-                'title' => 'Global Remote Work Share',
+                'title' => 'Remote & Hybrid Tech Roles',
                 'value' => '58%',
-                'description' => 'Percentage of tech companies offering fully remote or hybrid working arrangements.'
+                'percent' => 58,
+                'color' => '#8b5cf6',
+                'description' => 'Share of software and cybersecurity positions offering location flexibility.'
             ],
             [
-                'title' => 'Most Demanded Language: Python',
+                'title' => 'Python & AI Stack Demand',
                 'value' => '48%',
-                'description' => 'Percentage of tech job listings requiring or preferring Python proficiency.'
+                'percent' => 48,
+                'color' => '#f59e0b',
+                'description' => 'Proportion of engineering postings requesting Python, data mining, or ML tooling.'
             ],
             [
-                'title' => 'Cybersecurity Job Openings',
+                'title' => 'Unfilled Cybersecurity Roles',
                 'value' => '3.5M',
-                'description' => 'Global unfilled cybersecurity positions, representing a massive market demand.'
+                'percent' => 92,
+                'color' => '#ef4444',
+                'description' => 'Global talent shortage across network security, penetration testing, and SOC analysts.'
             ],
             [
-                'title' => 'Cloud & DevOps Adoption',
+                'title' => 'Enterprise Cloud Adoption',
                 'value' => '89%',
-                'description' => 'Proportion of enterprise companies utilizing cloud infrastructure (AWS/Azure/GCP).'
+                'percent' => 89,
+                'color' => '#06b6d4',
+                'description' => 'Organizations running production workloads on AWS, Microsoft Azure, or GCP.'
             ]
         ];
 

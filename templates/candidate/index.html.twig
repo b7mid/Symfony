@@ -1,29 +1,53 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Candidates List{% endblock %}
+{% block title %}Candidates | TechPortal{% endblock %}
 
 {% block body %}
-    <div class="container" style="padding: 2rem; max-width: 800px; margin: auto; font-family: sans-serif;">
-        <h1 style="color: #1f2937;">Candidate Listings</h1>
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 2rem;">
+        <div>
+            <h1 style="margin: 0; font-size: 1.85rem;">Registered Candidates</h1>
+            <p style="margin: 0.3rem 0 0; color: var(--text-secondary);">Total talent pool: {{ candidates|length }} profiles</p>
+        </div>
+        <input type="text" id="candidateSearch" onkeyup="filterCandidates()" placeholder="Search by email or ID..." style="padding: 0.65rem 1rem; width: 280px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); font-size: 0.95rem;">
+    </div>
 
-        {% if candidates is empty %}
-            <p style="color: #6b7280; margin-top: 1rem;">No candidates found in the database.</p>
-        {% else %}
-            <table style="width: 100%; border-collapse: collapse; margin-top: 1.5rem; background: #ffffff; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+    {% if candidates is empty %}
+        <div style="background: var(--bg-card); border: 1px solid var(--border-color); padding: 2.5rem; text-align: center; border-radius: 10px; color: var(--text-secondary);">
+            No candidates found in the database.
+        </div>
+    {% else %}
+        <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 10px; overflow: hidden;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left;">
                 <thead>
-                    <tr style="background-color: #f3f4f6; text-align: left;">
-                        <th style="padding: 0.75rem; border-bottom: 2px solid #e5e7eb;">ID</th>
-                        <th style="padding: 0.75rem; border-bottom: 2px solid #e5e7eb;">Email / Name</th>
-                        <th style="padding: 0.75rem; border-bottom: 2px solid #e5e7eb;">Actions</th>
+                    <tr style="background: rgba(15, 23, 42, 0.6); border-bottom: 1px solid var(--border-color); color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase;">
+                        <th style="padding: 1rem;">ID</th>
+                        <th style="padding: 1rem;">Candidate Identifier</th>
+                        <th style="padding: 1rem;">Access Roles</th>
+                        <th style="padding: 1rem; text-align: right;">Profile</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="candidatesTable">
                     {% for candidate in candidates %}
-                        <tr style="border-bottom: 1px solid #e5e7eb;">
-                            <td style="padding: 0.75rem;">{{ candidate.id }}</td>
-                            <td style="padding: 0.75rem;">{{ candidate.email ?? candidate.userIdentifier ?? 'N/A' }}</td>
-                            <td style="padding: 0.75rem;">
-                                <a href="{{ path('app_candidate_show', {id: candidate.id}) }}" style="color: #2563eb; text-decoration: none; font-weight: 500;">
+                        {% set identifier = candidate.email ?? candidate.userIdentifier ?? 'Unknown' %}
+                        <tr class="candidate-row" data-search="{{ (candidate.id ~ ' ' ~ identifier)|lower }}" style="border-bottom: 1px solid var(--border-color);">
+                            <td style="padding: 1rem; font-weight: 600; color: var(--text-secondary);">#{{ candidate.id }}</td>
+                            <td style="padding: 1rem;">
+                                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                    <div style="width: 34px; height: 34px; border-radius: 50%; background: var(--accent-emerald); color: #064e3b; font-weight: 700; display: flex; align-items: center; justify-content: center; font-size: 0.9rem;">
+                                        {{ identifier|slice(0, 1)|upper }}
+                                    </div>
+                                    <span style="font-weight: 500;">{{ identifier }}</span>
+                                </div>
+                            </td>
+                            <td style="padding: 1rem;">
+                                {% for role in candidate.roles %}
+                                    <span style="display: inline-block; font-size: 0.75rem; background: rgba(59, 130, 246, 0.15); color: var(--accent-blue); padding: 0.2rem 0.55rem; border-radius: 4px; margin-right: 0.3rem; font-weight: 600;">
+                                        {{ role }}
+                                    </span>
+                                {% endfor %}
+                            </td>
+                            <td style="padding: 1rem; text-align: right;">
+                                <a href="{{ path('app_candidate_show', {id: candidate.id}) }}" class="btn btn-emerald" style="padding: 0.45rem 0.9rem; font-size: 0.85rem;">
                                     View Summary
                                 </a>
                             </td>
@@ -31,6 +55,20 @@
                     {% endfor %}
                 </tbody>
             </table>
-        {% endif %}
+        </div>
+    {% endif %}
+
+    <div style="margin-top: 2.5rem;">
+        <a href="{{ path('app_home') }}" class="btn btn-slate">&larr; Back to Home</a>
     </div>
+
+    <script>
+        function filterCandidates() {
+            const query = document.getElementById('candidateSearch').value.toLowerCase();
+            document.querySelectorAll('.candidate-row').forEach(row => {
+                const text = row.getAttribute('data-search');
+                row.style.display = text.includes(query) ? '' : 'none';
+            });
+        }
+    </script>
 {% endblock %}
