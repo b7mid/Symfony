@@ -1,40 +1,170 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Job Listings{% endblock %}
+{% block title %}Job Offers | CS Career Hub{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .jobs-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+        background: #1e293b;
+        border: 1px solid #334155;
+        padding: 1rem 1.25rem;
+        border-radius: 12px 12px 0 0;
+        border-bottom: none;
+    }
+    .jobs-table-wrapper {
+        background: #1e293b;
+        border: 1px solid #334155;
+        border-radius: 0 0 12px 12px;
+        overflow-x: auto;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+    }
+    .jobs-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+    }
+    .jobs-table thead {
+        background: #0f172a;
+        border-bottom: 2px solid #334155;
+    }
+    .jobs-table th {
+        padding: 1rem 1.25rem;
+        color: #cbd5e1;
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.75px;
+        cursor: pointer;
+        user-select: none;
+    }
+    .jobs-table th:hover {
+        color: #ffffff;
+        background: #172033;
+    }
+    .jobs-table tbody tr {
+        border-bottom: 1px solid #293548;
+        transition: background-color 0.15s ease;
+    }
+    .jobs-table tbody tr:nth-child(even) {
+        background-color: rgba(15, 23, 42, 0.35);
+    }
+    .jobs-table tbody tr:hover {
+        background-color: rgba(245, 158, 11, 0.12);
+    }
+    .jobs-table td {
+        padding: 1rem 1.25rem;
+        vertical-align: middle;
+        color: #f1f5f9;
+        font-size: 0.95rem;
+    }
+    .job-id-pill {
+        font-family: 'Consolas', monospace;
+        background: rgba(245, 158, 11, 0.15);
+        border: 1px solid rgba(245, 158, 11, 0.3);
+        color: #fbbf24;
+        padding: 0.25rem 0.6rem;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+</style>
+{% endblock %}
 
 {% block body %}
-    <div class="container" style="padding: 2rem; max-width: 800px; margin: auto; font-family: sans-serif;">
-        <h1 style="color: #1f2937;">Available Job Offers</h1>
+    <div style="margin-bottom: 1.75rem; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h1 style="margin: 0; font-size: 1.9rem; letter-spacing: -0.5px;">Open Engineering Positions</h1>
+            <p style="margin: 0.35rem 0 0; color: #94a3b8;">Sortable catalog of active job listings in the database.</p>
+        </div>
+        <a href="{{ path('app_home') }}" class="btn btn-slate">&larr; Dashboard</a>
+    </div>
 
-        {% if jobs is empty %}
-            <p style="color: #6b7280; margin-top: 1rem;">No job listings found in the database.</p>
-        {% else %}
-            <table style="width: 100%; border-collapse: collapse; margin-top: 1.5rem; background: #ffffff; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+    {% if jobs is empty %}
+        <div style="background: #1e293b; border: 1px solid #334155; padding: 3rem; text-align: center; border-radius: 12px; color: #94a3b8;">
+            No job listings found in the database.
+        </div>
+    {% else %}
+        <div class="jobs-toolbar">
+            <span id="jobCountBadge" style="font-weight: 600; color: #cbd5e1; font-size: 0.9rem;">
+                Showing {{ jobs|length }} active offers
+            </span>
+            <input type="text" id="jobSearchInput" onkeyup="filterJobRows()" placeholder="🔍 Search job title or description..." style="padding: 0.55rem 1rem; width: 300px; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: #f8fafc; font-size: 0.9rem; outline: none;">
+        </div>
+
+        <div class="jobs-table-wrapper">
+            <table class="jobs-table">
                 <thead>
-                    <tr style="background-color: #f3f4f6; text-align: left;">
-                        <th style="padding: 0.75rem; border-bottom: 2px solid #e5e7eb;">ID</th>
-                        <th style="padding: 0.75rem; border-bottom: 2px solid #e5e7eb;">Job Title</th>
-                        <th style="padding: 0.75rem; border-bottom: 2px solid #e5e7eb;">Actions</th>
+                    <tr>
+                        <th onclick="sortJobTable(0)" style="width: 110px;">Ref ID <span id="jsort-0">↕</span></th>
+                        <th onclick="sortJobTable(1)">Position Title <span id="jsort-1">↕</span></th>
+                        <th style="cursor: default;">Summary Preview</th>
+                        <th style="cursor: default; text-align: right;">Details</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="jobsTableBody">
                     {% for job in jobs %}
-                        <tr style="border-bottom: 1px solid #e5e7eb;">
-                            <td style="padding: 0.75rem;">{{ job.id }}</td>
-                            <td style="padding: 0.75rem;">{{ job.title ?? 'N/A' }}</td>
-                            <td style="padding: 0.75rem;">
-                                <a href="{{ path('app_job_show', {id: job.id}) }}" style="color: #2563eb; text-decoration: none; font-weight: 500;">
-                                    View Job Summary
+                        {% set desc = job.description is defined and job.description ? job.description : 'Standard engineering role specification.' %}
+                        <tr class="job-row" data-id="{{ job.id }}" data-title="{{ (job.title ?? '')|lower }}" data-desc="{{ desc|lower }}">
+                            <td><span class="job-id-pill">JOB-{{ '%03d'|format(job.id) }}</span></td>
+                            <td style="font-weight: 600; color: #ffffff;">{{ job.title ?? 'Untitled Position' }}</td>
+                            <td style="color: #94a3b8; max-width: 380px;">
+                                {{ desc|length > 85 ? desc|slice(0, 85) ~ '...' : desc }}
+                            </td>
+                            <td style="text-align: right;">
+                                <a href="{{ path('app_job_show', {id: job.id}) }}" class="btn btn-amber" style="padding: 0.45rem 0.95rem; font-size: 0.85rem;">
+                                    View Offer &rarr;
                                 </a>
                             </td>
                         </tr>
                     {% endfor %}
                 </tbody>
             </table>
-        {% endif %}
-
-        <div style="margin-top: 2rem;">
-            <a href="{{ path('app_home') }}" style="color: #4b5563; text-decoration: none; font-weight: 500;">&larr; Back to Home</a>
         </div>
-    </div>
+    {% endif %}
+
+    <script>
+        let jobSortAsc = { 0: true, 1: true };
+
+        function filterJobRows() {
+            const q = document.getElementById('jobSearchInput').value.toLowerCase().trim();
+            const rows = document.querySelectorAll('.job-row');
+            let count = 0;
+
+            rows.forEach(row => {
+                const match = row.getAttribute('data-title').includes(q) ||
+                              row.getAttribute('data-desc').includes(q) ||
+                              row.getAttribute('data-id').includes(q);
+                row.style.display = match ? '' : 'none';
+                if (match) count++;
+            });
+
+            document.getElementById('jobCountBadge').textContent = `Showing ${count} of ${rows.length} active offers`;
+        }
+
+        function sortJobTable(col) {
+            const tbody = document.getElementById('jobsTableBody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            const asc = jobSortAsc[col];
+            jobSortAsc[col] = !asc;
+
+            document.getElementById('jsort-0').textContent = '↕';
+            document.getElementById('jsort-1').textContent = '↕';
+            document.getElementById('jsort-' + col).textContent = asc ? '↑' : '↓';
+
+            rows.sort((a, b) => {
+                const valA = col === 0 ? parseInt(a.getAttribute('data-id'), 10) : a.getAttribute('data-title');
+                const valB = col === 0 ? parseInt(b.getAttribute('data-id'), 10) : b.getAttribute('data-title');
+                if (valA < valB) return asc ? -1 : 1;
+                if (valA > valB) return asc ? 1 : -1;
+                return 0;
+            });
+
+            rows.forEach(r => tbody.appendChild(r));
+        }
+    </script>
 {% endblock %}

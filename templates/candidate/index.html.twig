@@ -1,74 +1,359 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Candidates | TechPortal{% endblock %}
+{% block title %}Candidates Directory | CS Career Hub{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .table-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+        background: #1e293b;
+        border: 1px solid #334155;
+        padding: 1rem 1.25rem;
+        border-radius: 12px 12px 0 0;
+        border-bottom: none;
+    }
+    .filter-pills {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    .pill-btn {
+        background: #0f172a;
+        color: #94a3b8;
+        border: 1px solid #334155;
+        padding: 0.45rem 0.9rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .pill-btn:hover {
+        color: #f8fafc;
+        border-color: #475569;
+    }
+    .pill-btn.active {
+        background: #3b82f6;
+        color: #ffffff;
+        border-color: #3b82f6;
+        box-shadow: 0 0 12px rgba(59, 130, 246, 0.35);
+    }
+    .search-box {
+        position: relative;
+        width: 290px;
+    }
+    .search-box input {
+        width: 100%;
+        padding: 0.55rem 1rem 0.55rem 2.3rem;
+        border-radius: 8px;
+        border: 1px solid #475569;
+        background: #0f172a;
+        color: #f8fafc;
+        font-size: 0.9rem;
+        outline: none;
+        transition: border-color 0.2s;
+    }
+    .search-box input:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    }
+    .search-icon {
+        position: absolute;
+        left: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #64748b;
+        font-size: 0.9rem;
+        pointer-events: none;
+    }
+    .pro-table-wrapper {
+        background: #1e293b;
+        border: 1px solid #334155;
+        border-radius: 0 0 12px 12px;
+        overflow-x: auto;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+    }
+    .pro-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+    }
+    .pro-table thead {
+        background: #0f172a;
+        border-bottom: 2px solid #334155;
+    }
+    .pro-table th {
+        padding: 1rem 1.25rem;
+        color: #cbd5e1;
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.75px;
+        cursor: pointer;
+        user-select: none;
+        transition: color 0.2s, background 0.2s;
+    }
+    .pro-table th:hover {
+        color: #ffffff;
+        background: #172033;
+    }
+    .pro-table th.no-sort {
+        cursor: default;
+    }
+    .pro-table th.no-sort:hover {
+        background: transparent;
+        color: #cbd5e1;
+    }
+    .sort-indicator {
+        display: inline-block;
+        margin-left: 0.35rem;
+        color: #64748b;
+        font-size: 0.75rem;
+    }
+    .pro-table tbody tr {
+        border-bottom: 1px solid #293548;
+        transition: background-color 0.15s ease;
+    }
+    .pro-table tbody tr:nth-child(even) {
+        background-color: rgba(15, 23, 42, 0.35);
+    }
+    .pro-table tbody tr:hover {
+        background-color: rgba(59, 130, 246, 0.12);
+    }
+    .pro-table td {
+        padding: 1rem 1.25rem;
+        vertical-align: middle;
+        color: #f1f5f9;
+        font-size: 0.95rem;
+    }
+    .id-badge {
+        font-family: 'Consolas', monospace;
+        background: #0f172a;
+        border: 1px solid #334155;
+        color: #94a3b8;
+        padding: 0.25rem 0.6rem;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+    .avatar-circle {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: #ffffff;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
+        flex-shrink: 0;
+    }
+    .role-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.75rem;
+        padding: 0.25rem 0.65rem;
+        border-radius: 6px;
+        font-weight: 700;
+        letter-spacing: 0.4px;
+        margin-right: 0.35rem;
+    }
+    .role-admin {
+        background: rgba(245, 158, 11, 0.15);
+        color: #fbbf24;
+        border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+    .role-user {
+        background: rgba(59, 130, 246, 0.15);
+        color: #60a5fa;
+        border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+    .status-dot {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.85rem;
+        color: #34d399;
+        font-weight: 500;
+    }
+    .status-dot::before {
+        content: '';
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #10b981;
+        box-shadow: 0 0 8px #10b981;
+    }
+    .table-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.9rem 1.25rem;
+        background: #0f172a;
+        border-top: 1px solid #334155;
+        font-size: 0.85rem;
+        color: #94a3b8;
+    }
+</style>
+{% endblock %}
 
 {% block body %}
-    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 2rem;">
+    <div style="margin-bottom: 1.75rem; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem;">
         <div>
-            <h1 style="margin: 0; font-size: 1.85rem;">Registered Candidates</h1>
-            <p style="margin: 0.3rem 0 0; color: var(--text-secondary);">Total talent pool: {{ candidates|length }} profiles</p>
+            <h1 style="margin: 0; font-size: 1.9rem; letter-spacing: -0.5px;">Candidate Talent Directory</h1>
+            <p style="margin: 0.35rem 0 0; color: #94a3b8;">Click any column header to sort or filter candidates by role and identifier.</p>
         </div>
-        <input type="text" id="candidateSearch" onkeyup="filterCandidates()" placeholder="Search by email or ID..." style="padding: 0.65rem 1rem; width: 280px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); font-size: 0.95rem;">
+        <a href="{{ path('app_home') }}" class="btn btn-slate">&larr; Dashboard</a>
     </div>
 
     {% if candidates is empty %}
-        <div style="background: var(--bg-card); border: 1px solid var(--border-color); padding: 2.5rem; text-align: center; border-radius: 10px; color: var(--text-secondary);">
+        <div style="background: #1e293b; border: 1px solid #334155; padding: 3rem; text-align: center; border-radius: 12px; color: #94a3b8;">
             No candidates found in the database.
         </div>
     {% else %}
-        <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 10px; overflow: hidden;">
-            <table style="width: 100%; border-collapse: collapse; text-align: left;">
+        <!-- Table Toolbar -->
+        <div class="table-controls">
+            <div class="filter-pills">
+                <button class="pill-btn active" onclick="setRoleFilter('ALL', this)">All Candidates ({{ candidates|length }})</button>
+                <button class="pill-btn" onclick="setRoleFilter('ROLE_ADMIN', this)">Admins</button>
+                <button class="pill-btn" onclick="setRoleFilter('ROLE_USER', this)">Standard Users</button>
+            </div>
+
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="candidateSearch" onkeyup="applyFilters()" placeholder="Filter by email or ID...">
+            </div>
+        </div>
+
+        <!-- Professional Data Table -->
+        <div class="pro-table-wrapper">
+            <table class="pro-table" id="candidatesTable">
                 <thead>
-                    <tr style="background: rgba(15, 23, 42, 0.6); border-bottom: 1px solid var(--border-color); color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase;">
-                        <th style="padding: 1rem;">ID</th>
-                        <th style="padding: 1rem;">Candidate Identifier</th>
-                        <th style="padding: 1rem;">Access Roles</th>
-                        <th style="padding: 1rem; text-align: right;">Profile</th>
+                    <tr>
+                        <th onclick="sortTable(0, 'num')" style="width: 100px;">ID <span class="sort-indicator" id="sort-0">↕</span></th>
+                        <th onclick="sortTable(1, 'str')">Candidate <span class="sort-indicator" id="sort-1">↕</span></th>
+                        <th onclick="sortTable(2, 'str')">System Roles <span class="sort-indicator" id="sort-2">↕</span></th>
+                        <th class="no-sort">Status</th>
+                        <th class="no-sort" style="text-align: right;">Action</th>
                     </tr>
                 </thead>
-                <tbody id="candidatesTable">
+                <tbody id="candidatesBody">
                     {% for candidate in candidates %}
                         {% set identifier = candidate.email ?? candidate.userIdentifier ?? 'Unknown' %}
-                        <tr class="candidate-row" data-search="{{ (candidate.id ~ ' ' ~ identifier)|lower }}" style="border-bottom: 1px solid var(--border-color);">
-                            <td style="padding: 1rem; font-weight: 600; color: var(--text-secondary);">#{{ candidate.id }}</td>
-                            <td style="padding: 1rem;">
-                                <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                    <div style="width: 34px; height: 34px; border-radius: 50%; background: var(--accent-emerald); color: #064e3b; font-weight: 700; display: flex; align-items: center; justify-content: center; font-size: 0.9rem;">
-                                        {{ identifier|slice(0, 1)|upper }}
+                        {% set rolesString = candidate.roles|join(',') %}
+                        <tr class="candidate-row"
+                            data-id="{{ candidate.id }}"
+                            data-name="{{ identifier|lower }}"
+                            data-roles="{{ rolesString }}">
+                            <td>
+                                <span class="id-badge">#{{ '%03d'|format(candidate.id) }}</span>
+                            </td>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 0.85rem;">
+                                    <div class="avatar-circle">{{ identifier|slice(0, 1)|upper }}</div>
+                                    <div>
+                                        <div style="font-weight: 600; color: #f8fafc;">{{ identifier }}</div>
+                                        <div style="font-size: 0.8rem; color: #64748b;">Engineering Applicant</div>
                                     </div>
-                                    <span style="font-weight: 500;">{{ identifier }}</span>
                                 </div>
                             </td>
-                            <td style="padding: 1rem;">
+                            <td>
                                 {% for role in candidate.roles %}
-                                    <span style="display: inline-block; font-size: 0.75rem; background: rgba(59, 130, 246, 0.15); color: var(--accent-blue); padding: 0.2rem 0.55rem; border-radius: 4px; margin-right: 0.3rem; font-weight: 600;">
-                                        {{ role }}
+                                    <span class="role-badge {{ role == 'ROLE_ADMIN' ? 'role-admin' : 'role-user' }}">
+                                        {{ role|replace({'ROLE_': ''}) }}
                                     </span>
                                 {% endfor %}
                             </td>
-                            <td style="padding: 1rem; text-align: right;">
-                                <a href="{{ path('app_candidate_show', {id: candidate.id}) }}" class="btn btn-emerald" style="padding: 0.45rem 0.9rem; font-size: 0.85rem;">
-                                    View Summary
+                            <td>
+                                <span class="status-dot">Verified</span>
+                            </td>
+                            <td style="text-align: right;">
+                                <a href="{{ path('app_candidate_show', {id: candidate.id}) }}" class="btn btn-blue" style="padding: 0.45rem 0.95rem; font-size: 0.85rem;">
+                                    Inspect Profile &rarr;
                                 </a>
                             </td>
                         </tr>
                     {% endfor %}
                 </tbody>
             </table>
+
+            <div class="table-footer">
+                <span id="visibleCount">Showing {{ candidates|length }} of {{ candidates|length }} candidates</span>
+                <span>Click column headers to sort</span>
+            </div>
         </div>
     {% endif %}
 
-    <div style="margin-top: 2.5rem;">
-        <a href="{{ path('app_home') }}" class="btn btn-slate">&larr; Back to Home</a>
-    </div>
-
     <script>
-        function filterCandidates() {
-            const query = document.getElementById('candidateSearch').value.toLowerCase();
-            document.querySelectorAll('.candidate-row').forEach(row => {
-                const text = row.getAttribute('data-search');
-                row.style.display = text.includes(query) ? '' : 'none';
+        let currentRole = 'ALL';
+        let sortDirections = { 0: true, 1: true, 2: true };
+
+        function setRoleFilter(role, btn) {
+            currentRole = role;
+            document.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            applyFilters();
+        }
+
+        function applyFilters() {
+            const query = document.getElementById('candidateSearch').value.toLowerCase().trim();
+            const rows = document.querySelectorAll('.candidate-row');
+            let visible = 0;
+
+            rows.forEach(row => {
+                const id = row.getAttribute('data-id');
+                const name = row.getAttribute('data-name');
+                const roles = row.getAttribute('data-roles');
+
+                const matchesSearch = name.includes(query) || id.includes(query) || ('#' + id.padStart(3, '0')).includes(query);
+                const matchesRole = currentRole === 'ALL' || roles.includes(currentRole);
+
+                if (matchesSearch && matchesRole) {
+                    row.style.display = '';
+                    visible++;
+                } else {
+                    row.style.display = 'none';
+                }
             });
+
+            document.getElementById('visibleCount').textContent = `Showing ${visible} of ${rows.length} candidates`;
+        }
+
+        function sortTable(colIndex, type) {
+            const tbody = document.getElementById('candidatesBody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            const asc = sortDirections[colIndex];
+            sortDirections[colIndex] = !asc;
+
+            document.querySelectorAll('.sort-indicator').forEach(el => el.textContent = '↕');
+            document.getElementById('sort-' + colIndex).textContent = asc ? '↑' : '↓';
+
+            rows.sort((a, b) => {
+                let valA, valB;
+                if (colIndex === 0) {
+                    valA = parseInt(a.getAttribute('data-id'), 10);
+                    valB = parseInt(b.getAttribute('data-id'), 10);
+                } else if (colIndex === 1) {
+                    valA = a.getAttribute('data-name');
+                    valB = b.getAttribute('data-name');
+                } else {
+                    valA = a.getAttribute('data-roles');
+                    valB = b.getAttribute('data-roles');
+                }
+
+                if (valA < valB) return asc ? -1 : 1;
+                if (valA > valB) return asc ? 1 : -1;
+                return 0;
+            });
+
+            rows.forEach(row => tbody.appendChild(row));
         }
     </script>
 {% endblock %}
