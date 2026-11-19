@@ -203,7 +203,7 @@
             <div class="astro-eyebrow">✦ Orbital Engineering &amp; Talent Matrix</div>
             <h1 class="astro-title">Welcome to <span>CS Career Hub</span></h1>
             <p class="astro-subtitle">
-                Explore computer science market statistics and active job offers, create a guest account to apply for positions, or sign in as admin to inspect candidate listings.
+                Explore computer science market statistics and active job offers, sign in or create a guest account to apply for positions, or enter the admin console to inspect candidates.
             </p>
 
             <div class="astro-actions">
@@ -213,8 +213,8 @@
                 <a href="{{ path('app_job_index') }}" class="astro-btn astro-btn-jobs">
                     <span>✦</span> View Job Offers
                 </a>
-                <a href="{{ path('app_guest_portal') }}" class="astro-btn astro-btn-guest">
-                    <span>❖</span> Guest Page
+                <a href="{{ path('app_unified_access') }}" class="astro-btn astro-btn-guest">
+                    <span>❖</span> Login / Guest Account
                 </a>
                 <a href="{{ path('app_admin_portal') }}" class="astro-btn astro-btn-admin">
                     <span>⛨</span> Admin Page
@@ -229,15 +229,15 @@
                 </div>
 
                 <div class="astro-stat-card">
-                    <div class="astro-stat-label" style="color: #34d399;">Guest Portal</div>
+                    <div class="astro-stat-label" style="color: #34d399;">Guest Access</div>
                     <div class="astro-stat-value" style="color: #a7f3d0;">Apply</div>
-                    <p class="astro-stat-hint">Register, log in &amp; apply to jobs</p>
+                    <p class="astro-stat-hint">Sign in or register to apply for jobs</p>
                 </div>
 
                 <div class="astro-stat-card">
                     <div class="astro-stat-label" style="color: #c084fc;">Admin Console</div>
                     <div class="astro-stat-value" style="color: #e9d5ff;">{{ candidateCount is defined ? candidateCount : '—' }}</div>
-                    <p class="astro-stat-hint">Protected candidate listing (admin/admin)</p>
+                    <p class="astro-stat-hint">Protected candidate directory</p>
                 </div>
             </div>
         </div>

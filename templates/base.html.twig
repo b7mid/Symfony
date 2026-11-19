@@ -143,9 +143,8 @@
                 <a href="{{ path('app_home') }}" class="{{ current_route == 'app_home' ? 'active' : '' }}">Home</a>
                 <a href="{{ path('app_numbers') }}" class="{{ current_route == 'app_numbers' ? 'active' : '' }}">View Numbers</a>
                 <a href="{{ path('app_job_index') }}" class="{{ current_route starts with 'app_job' ? 'active' : '' }}">Job Offers</a>
-                <a href="{{ path('app_guest_portal') }}" class="nav-guest {{ current_route starts with 'app_guest' ? 'active' : '' }}">Guest Page</a>
-                <a href="{{ path('app_admin_portal') }}" class="nav-admin {{ current_route == 'app_admin_portal' ? 'active' : '' }}">Admin Page</a>
-                <a href="{{ path('app_admin_candidates') }}" class="nav-admin {{ current_route starts with 'app_admin_candidates' or current_route starts with 'app_candidate' ? 'active' : '' }}">Candidates</a>
+                <a href="{{ path('app_unified_access') }}" class="nav-guest {{ current_route in ['app_unified_access', 'app_login_page'] ? 'active' : '' }}">Login / Register</a>
+                <a href="{{ path('app_admin_portal') }}" class="nav-admin {{ current_route starts with 'app_admin' or current_route starts with 'app_candidate' ? 'active' : '' }}">Admin &amp; Candidates</a>
             </nav>
         </header>
 

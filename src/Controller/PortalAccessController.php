@@ -9,112 +9,105 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
 class PortalAccessController extends AbstractController
 {
-    #[Route('/guest', name: 'app_guest_portal', methods: ['GET'])]
-    public function guestPortal(Request $request): Response
-    {
-        $session = $request->getSession();
-        $guestEmail = $session->get('guest_user_email');
-        $appliedJobs = $session->get('applied_jobs', []);
-
-        return $this->render('portal/guest.html.twig', [
-            'guestEmail' => $guestEmail,
-            'appliedJobs' => $appliedJobs,
-        ]);
-    }
-
-    #[Route('/guest/register', name: 'app_guest_register', methods: ['POST'])]
-    public function guestRegister(
+    #[Route('/access', name: 'app_unified_access', methods: ['GET', 'POST'])]
+    #[Route('/login', name: 'app_login_page', methods: ['GET', 'POST'])]
+    public function unifiedAccess(
         Request $request,
         UserRepository $userRepository,
         EntityManagerInterface $entityManager,
         UserPasswordHasherInterface $passwordHasher
     ): Response {
         $session = $request->getSession();
-        $email = trim((string) $request->request->get('email', ''));
-        $password = (string) $request->request->get('password', '');
 
-        if ($email === '' || $password === '') {
-            $this->addFlash('error', 'Please enter both an email and a password to create a guest account.');
-            return $this->redirectToRoute('app_guest_portal');
-        }
+        if ($request->isMethod('POST')) {
+            $mode = (string) $request->request->get('mode', 'login');
+            $identifier = trim((string) $request->request->get('identifier', ''));
+            $password = (string) $request->request->get('password', '');
 
-        if ($userRepository->findOneBy(['email' => $email])) {
-            $this->addFlash('error', 'An account with this email already exists. Please log in instead.');
-            return $this->redirectToRoute('app_guest_portal');
-        }
-
-        $user = new User();
-        if (method_exists($user, 'setEmail')) {
-            $user->setEmail($email);
-        }
-        if (method_exists($user, 'setRoles')) {
-            $user->setRoles(['ROLE_USER']);
-        }
-        if (method_exists($user, 'setPassword')) {
-            $hashedPassword = $passwordHasher->hashPassword($user, $password);
-            $user->setPassword($hashedPassword);
-        }
-
-        $entityManager->persist($user);
-        $entityManager->flush();
-
-        $session->set('guest_user_email', $email);
-        $session->set('guest_authenticated', true);
-
-        $this->addFlash('success', 'Guest account created and logged in as ' . $email . '. You can now apply for jobs!');
-        return $this->redirectToRoute('app_job_index');
-    }
-
-    #[Route('/guest/login', name: 'app_guest_login', methods: ['POST'])]
-    public function guestLogin(
-        Request $request,
-        UserRepository $userRepository,
-        UserPasswordHasherInterface $passwordHasher
-    ): Response {
-        $session = $request->getSession();
-        $email = trim((string) $request->request->get('email', ''));
-        $password = (string) $request->request->get('password', '');
-
-        if ($email === '' || $password === '') {
-            $this->addFlash('error', 'Email and password are required to log in.');
-            return $this->redirectToRoute('app_guest_portal');
-        }
-
-        $user = $userRepository->findOneBy(['email' => $email]);
-        if (!$user) {
-            $this->addFlash('error', 'Guest account not found. Create an account first.');
-            return $this->redirectToRoute('app_guest_portal');
-        }
-
-        if (method_exists($user, 'getPassword') && $user->getPassword()) {
-            if (!$passwordHasher->isPasswordValid($user, $password)) {
-                $this->addFlash('error', 'Invalid password for this guest account.');
-                return $this->redirectToRoute('app_guest_portal');
+            if ($identifier === '' || $password === '') {
+                $this->addFlash('error', 'Please fill in both fields.');
+                return $this->redirectToRoute('app_unified_access');
             }
+
+            // Admin check (both login and register attempts with admin credentials are checked securely)
+            if ($identifier === 'admin') {
+                if ($password === 'admin') {
+                    $session->remove('guest_authenticated');
+                    $session->remove('guest_user_email');
+                    $session->set('admin_authenticated', true);
+                    $session->set('admin_username', 'admin');
+
+                    $this->addFlash('success', 'Authenticated as Admin. Welcome to the Admin Portal.');
+                    return $this->redirectToRoute('app_admin_portal');
+                }
+
+                $this->addFlash('error', 'Invalid credentials.');
+                return $this->redirectToRoute('app_unified_access');
+            }
+
+            // Guest account creation flow
+            if ($mode === 'register') {
+                if ($userRepository->findOneBy(['email' => $identifier])) {
+                    $this->addFlash('error', 'An account with this identifier already exists. Switch to Sign In.');
+                    return $this->redirectToRoute('app_unified_access');
+                }
+
+                $user = new User();
+                if (method_exists($user, 'setEmail')) {
+                    $user->setEmail($identifier);
+                }
+                if (method_exists($user, 'setRoles')) {
+                    $user->setRoles(['ROLE_USER']);
+                }
+                if (method_exists($user, 'setPassword')) {
+                    $user->setPassword($passwordHasher->hashPassword($user, $password));
+                }
+
+                $entityManager->persist($user);
+                $entityManager->flush();
+
+                $session->remove('admin_authenticated');
+                $session->remove('admin_username');
+                $session->set('guest_authenticated', true);
+                $session->set('guest_user_email', $identifier);
+
+                $this->addFlash('success', 'Guest account created. You are now logged in as ' . $identifier . ' and can apply for jobs.');
+                return $this->redirectToRoute('app_job_index');
+            }
+
+            // Guest login flow
+            $user = $userRepository->findOneBy(['email' => $identifier]);
+            if (!$user) {
+                $this->addFlash('error', 'Account not found. Create a guest account if you do not have one yet.');
+                return $this->redirectToRoute('app_unified_access');
+            }
+
+            if (method_exists($user, 'getPassword') && $user->getPassword()) {
+                if (!$passwordHasher->isPasswordValid($user, $password)) {
+                    $this->addFlash('error', 'Invalid credentials.');
+                    return $this->redirectToRoute('app_unified_access');
+                }
+            }
+
+            $session->remove('admin_authenticated');
+            $session->remove('admin_username');
+            $session->set('guest_authenticated', true);
+            $session->set('guest_user_email', $identifier);
+
+            $this->addFlash('success', 'Logged in as ' . $identifier . '. You can now apply for jobs.');
+            return $this->redirectToRoute('app_job_index');
         }
 
-        $session->set('guest_user_email', $email);
-        $session->set('guest_authenticated', true);
-
-        $this->addFlash('success', 'Welcome back, ' . $email . '! Job applications are unlocked.');
-        return $this->redirectToRoute('app_job_index');
-    }
-
-    #[Route('/guest/logout', name: 'app_guest_logout', methods: ['POST', 'GET'])]
-    public function guestLogout(Request $request): Response
-    {
-        $session = $request->getSession();
-        $session->remove('guest_user_email');
-        $session->remove('guest_authenticated');
-
-        $this->addFlash('info', 'You have logged out of the Guest Portal.');
-        return $this->redirectToRoute('app_guest_portal');
+        return $this->render('portal/access.html.twig', [
+            'isAdmin' => (bool) $session->get('admin_authenticated', false),
+            'guestEmail' => $session->get('guest_user_email'),
+            'appliedCount' => count($session->get('applied_jobs', [])),
+        ]);
     }
 
     #[Route('/jobs/{id}/apply', name: 'app_job_apply', requirements: ['id' => '\d+'], methods: ['POST'])]
@@ -125,8 +118,8 @@ class PortalAccessController extends AbstractController
         $guestEmail = (string) $session->get('guest_user_email', '');
 
         if (!$isGuest || $guestEmail === '') {
-            $this->addFlash('error', 'Please create a guest account or log in on the Guest Page before applying for a job.');
-            return $this->redirectToRoute('app_guest_portal');
+            $this->addFlash('error', 'Please log in or create a guest account first to apply for a job.');
+            return $this->redirectToRoute('app_unified_access');
         }
 
         $job = $jobRepository->find($id);
@@ -140,7 +133,7 @@ class PortalAccessController extends AbstractController
         if (!in_array($id, $appliedJobs, true)) {
             $appliedJobs[] = $id;
             $session->set('applied_jobs', $appliedJobs);
-            $this->addFlash('success', 'Application submitted by ' . $guestEmail . ' for "' . $jobTitle . '"!');
+            $this->addFlash('success', 'Application submitted by ' . $guestEmail . ' for "' . $jobTitle . '".');
         } else {
             $this->addFlash('info', 'You have already applied for "' . $jobTitle . '" with ' . $guestEmail . '.');
         }
@@ -148,32 +141,17 @@ class PortalAccessController extends AbstractController
         return $this->redirectToRoute('app_job_show', ['id' => $id]);
     }
 
-    #[Route('/admin', name: 'app_admin_portal', methods: ['GET', 'POST'])]
+    #[Route('/admin', name: 'app_admin_portal', methods: ['GET'])]
     public function adminPortal(Request $request, UserRepository $userRepository): Response
     {
-        $session = $request->getSession();
-
-        if ($request->isMethod('POST')) {
-            $username = trim((string) $request->request->get('username', ''));
-            $password = (string) $request->request->get('password', '');
-
-            if ($username === 'admin' && $password === 'admin') {
-                $session->set('admin_authenticated', true);
-                $session->set('admin_username', 'admin');
-                $this->addFlash('success', 'Admin access granted. Welcome to Candidate Listing.');
-                return $this->redirectToRoute('app_admin_candidates');
-            }
-
-            $this->addFlash('error', 'Invalid admin credentials. Use username "admin" and password "admin".');
-            return $this->redirectToRoute('app_admin_portal');
+        if (!$request->getSession()->get('admin_authenticated', false)) {
+            $this->addFlash('error', 'Admin login required to access the Admin Portal and Candidate Listing.');
+            return $this->redirectToRoute('app_unified_access');
         }
 
-        $isAdmin = (bool) $session->get('admin_authenticated', false);
-        $candidates = $isAdmin ? $userRepository->findAll() : [];
-
         return $this->render('portal/admin.html.twig', [
-            'isAdmin' => $isAdmin,
-            'candidates' => $candidates,
+            'isAdmin' => true,
+            'candidates' => $userRepository->findAll(),
         ]);
     }
 
@@ -181,8 +159,8 @@ class PortalAccessController extends AbstractController
     public function adminCandidates(Request $request, UserRepository $userRepository): Response
     {
         if (!$request->getSession()->get('admin_authenticated', false)) {
-            $this->addFlash('error', 'Admin login required (user: admin / pass: admin) to view Candidate Listing.');
-            return $this->redirectToRoute('app_admin_portal');
+            $this->addFlash('error', 'Admin login required to view Candidate Listing.');
+            return $this->redirectToRoute('app_unified_access');
         }
 
         return $this->render('candidate/index.html.twig', [
@@ -190,14 +168,16 @@ class PortalAccessController extends AbstractController
         ]);
     }
 
-    #[Route('/admin/logout', name: 'app_admin_logout', methods: ['POST', 'GET'])]
-    public function adminLogout(Request $request): Response
+    #[Route('/logout', name: 'app_portal_logout', methods: ['GET', 'POST'])]
+    public function logout(Request $request): Response
     {
         $session = $request->getSession();
         $session->remove('admin_authenticated');
         $session->remove('admin_username');
+        $session->remove('guest_authenticated');
+        $session->remove('guest_user_email');
 
-        $this->addFlash('info', 'Admin session closed.');
-        return $this->redirectToRoute('app_admin_portal');
+        $this->addFlash('info', 'You have been signed out.');
+        return $this->redirectToRoute('app_unified_access');
     }
 }
