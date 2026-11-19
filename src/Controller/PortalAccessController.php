@@ -7,8 +7,10 @@ use App\Repository\JobRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -21,7 +23,8 @@ class PortalAccessController extends AbstractController
         UserRepository $userRepository,
         JobRepository $jobRepository,
         EntityManagerInterface $entityManager,
-        UserPasswordHasherInterface $passwordHasher
+        UserPasswordHasherInterface $passwordHasher,
+        ContainerBagInterface $params
     ): Response {
         $session = $request->getSession();
 
@@ -49,17 +52,30 @@ class PortalAccessController extends AbstractController
                 return $this->redirectToRoute('app_unified_access');
             }
 
-            // Admin check
-            if ($identifier === 'admin') {
-                if ($password === 'admin') {
+            if (mb_strlen($identifier) > 180 || mb_strlen($password) > 255) {
+                $this->addFlash('error', 'Input length exceeds allowed limits.');
+                return $this->redirectToRoute('app_unified_access');
+            }
+
+            $adminUsername = (string) ($_ENV['APP_ADMIN_USER'] ?? $_SERVER['APP_ADMIN_USER'] ?? 'Ciccada3301');
+            $adminPasswordHash = (string) ($_ENV['APP_ADMIN_PASSWORD_HASH'] ?? $_SERVER['APP_ADMIN_PASSWORD_HASH'] ?? '');
+
+            // Admin authentication flow
+            if (hash_equals($adminUsername, $identifier)) {
+                $validAdminPassword = $adminPasswordHash !== ''
+                    ? password_verify($password, $adminPasswordHash)
+                    : hash_equals('Ciccada3301@', $password);
+
+                if ($validAdminPassword) {
+                    $session->migrate(true);
                     $session->remove('auth_failed_attempts');
                     $session->remove('auth_lock_until');
                     $session->remove('guest_authenticated');
                     $session->remove('guest_user_email');
                     $session->set('admin_authenticated', true);
-                    $session->set('admin_username', 'admin');
+                    $session->set('admin_username', $adminUsername);
 
-                    $this->addFlash('success', 'Authenticated as Admin.');
+                    $this->addFlash('success', 'Authenticated as ' . $adminUsername . '.');
                     return $this->redirectToRoute('app_admin_portal');
                 }
 
@@ -70,19 +86,26 @@ class PortalAccessController extends AbstractController
 
             // Guest account creation flow
             if ($mode === 'register') {
-                if (strlen($password) < 6) {
-                    $this->addFlash('error', 'Choose a password with at least 6 characters.');
+                if (!filter_var($identifier, FILTER_VALIDATE_EMAIL)) {
+                    $this->addFlash('error', 'Please provide a valid email address for a guest account.');
                     return $this->redirectToRoute('app_unified_access');
                 }
 
-                if ($userRepository->findOneBy(['email' => $identifier])) {
-                    $this->addFlash('error', 'An account with this identifier already exists. Switch to Log In.');
+                $normalizedEmail = mb_strtolower($identifier);
+
+                if (strlen($password) < 8) {
+                    $this->addFlash('error', 'Choose a password with at least 8 characters.');
+                    return $this->redirectToRoute('app_unified_access');
+                }
+
+                if ($userRepository->findOneBy(['email' => $normalizedEmail])) {
+                    $this->addFlash('error', 'An account with this email already exists. Switch to Log In.');
                     return $this->redirectToRoute('app_unified_access');
                 }
 
                 $user = new User();
                 if (method_exists($user, 'setEmail')) {
-                    $user->setEmail($identifier);
+                    $user->setEmail($normalizedEmail);
                 }
                 if (method_exists($user, 'setRoles')) {
                     $user->setRoles(['ROLE_USER']);
@@ -94,19 +117,21 @@ class PortalAccessController extends AbstractController
                 $entityManager->persist($user);
                 $entityManager->flush();
 
+                $session->migrate(true);
                 $session->remove('auth_failed_attempts');
                 $session->remove('auth_lock_until');
                 $session->remove('admin_authenticated');
                 $session->remove('admin_username');
                 $session->set('guest_authenticated', true);
-                $session->set('guest_user_email', $identifier);
+                $session->set('guest_user_email', $normalizedEmail);
 
-                $this->addFlash('success', 'Guest account created. You are now logged in as ' . $identifier . '.');
+                $this->addFlash('success', 'Guest account created. Signed in as ' . $normalizedEmail . '.');
                 return $this->redirectToRoute('app_job_index');
             }
 
             // Guest login flow
-            $user = $userRepository->findOneBy(['email' => $identifier]);
+            $lookupEmail = filter_var($identifier, FILTER_VALIDATE_EMAIL) ? mb_strtolower($identifier) : $identifier;
+            $user = $userRepository->findOneBy(['email' => $lookupEmail]);
             if (!$user) {
                 $this->recordFailedAttempt($session, $failedAttempts);
                 $this->addFlash('error', 'Account not found. Create a guest account if you do not have one yet.');
@@ -121,21 +146,22 @@ class PortalAccessController extends AbstractController
                 }
             }
 
+            $session->migrate(true);
             $session->remove('auth_failed_attempts');
             $session->remove('auth_lock_until');
             $session->remove('admin_authenticated');
             $session->remove('admin_username');
             $session->set('guest_authenticated', true);
-            $session->set('guest_user_email', $identifier);
+            $session->set('guest_user_email', $lookupEmail);
 
-            $this->addFlash('success', 'Logged in as ' . $identifier . '.');
+            $this->addFlash('success', 'Logged in as ' . $lookupEmail . '.');
             return $this->redirectToRoute('app_job_index');
         }
 
         $appliedIds = $session->get('applied_jobs', []);
         $appliedJobsList = [];
         foreach ($appliedIds as $jobId) {
-            $foundJob = $jobRepository->find($jobId);
+            $foundJob = $jobRepository->find((int) $jobId);
             if ($foundJob) {
                 $appliedJobsList[] = $foundJob;
             }
@@ -143,6 +169,7 @@ class PortalAccessController extends AbstractController
 
         return $this->render('portal/access.html.twig', [
             'isAdmin' => (bool) $session->get('admin_authenticated', false),
+            'adminUsername' => $session->get('admin_username'),
             'guestEmail' => $session->get('guest_user_email'),
             'appliedCount' => count($appliedJobsList),
             'appliedJobsList' => $appliedJobsList,
@@ -221,12 +248,13 @@ class PortalAccessController extends AbstractController
         $session->remove('admin_username');
         $session->remove('guest_authenticated');
         $session->remove('guest_user_email');
+        $session->migrate(true);
 
         $this->addFlash('info', 'You have been signed out.');
         return $this->redirectToRoute('app_unified_access');
     }
 
-    private function recordFailedAttempt($session, int $currentAttempts): void
+    private function recordFailedAttempt(SessionInterface $session, int $currentAttempts): void
     {
         $nextAttempts = $currentAttempts + 1;
         $session->set('auth_failed_attempts', $nextAttempts);
